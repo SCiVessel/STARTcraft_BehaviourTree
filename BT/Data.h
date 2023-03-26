@@ -15,6 +15,11 @@
 #define SUPPLY_PROVIDED_BY_CC 20
 #define SUPPLY_PROVIDED_BY_SD 16
 
+//Define army factor
+#define BARRACKS_FACTOR 2
+#define FACTORY_FACTOR 3
+#define STARPORT_FACTOR 3
+
 
 class Data {
 public:

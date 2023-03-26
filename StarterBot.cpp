@@ -80,6 +80,17 @@ StarterBot::StarterBot()
                 BT_ACTION_WAIT* pBarrackWait = new BT_ACTION_WAIT("WaitForResponse", pBuildBarracksAndWait, 0.2);
 
 
+            //Train Marine
+            BT_DECO_REPEATER* pTrainingMarineForeverRepeater = new BT_DECO_REPEATER("RepeatForeverTrainingMarine", pParallelSeq, 0, true, false, false);
+            BA_DECO_CONDITION_NOT_ENOUGH_MARINE* pNotEnoughMarine = new BA_DECO_CONDITION_NOT_ENOUGH_MARINE("NotEnoughMarine", pTrainingMarineForeverRepeater);
+            BA_ACTION_TRAIN_MARINE* pTrainMarine = new BA_ACTION_TRAIN_MARINE("TrainMarine", pNotEnoughMarine);
+
+
+            //Retributive Attack
+            BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, false);
+            GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pRetributionForeverRepeater);
+            UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pIsUnderAttack);
+
 
         //Cease action
         BT_ACTION_WAIT* pWait = new BT_ACTION_WAIT("CeaseAction", pMain, 0.5);
@@ -155,6 +166,29 @@ void StarterBot::onFrame()
         {
             pData->nWantedBarracksTotal = 5;
         }
+
+        //Supply Depot
+        if (BWAPI::Broodwar->elapsedTime() >= EARLY_GAME) {
+            int numBarracks = 0;
+            int numFactories = 0;
+            int numStarPorts = 0;
+
+            for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+            {
+                // if the unit is of the correct type, and it actually has been constructed, return it
+                if (unit->getType() == BWAPI::UnitTypes::Terran_Barracks) {
+                    numBarracks += 1;
+                }
+                else if (unit->getType() == BWAPI::UnitTypes::Terran_Factory) {
+                    numFactories += 1;
+                }
+                else if (unit->getType() == BWAPI::UnitTypes::Terran_Starport) {
+                    numStarPorts += 1;
+                }
+            }
+            pData->thresholdSupply = int(BARRACKS_FACTOR * numBarracks + FACTORY_FACTOR * numFactories + STARPORT_FACTOR * numStarPorts);
+        }
+        
     
 }
 /*

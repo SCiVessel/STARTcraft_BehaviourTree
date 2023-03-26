@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class BA_ACTION_TRAIN_MARINE: public BT_ACTION {
+class UNIT_ACTION_RETRIBUTIVE_ATTACK: public BT_ACTION {
 public:
-    BA_ACTION_TRAIN_MARINE(std::string name, BT_NODE* parent);
+    UNIT_ACTION_RETRIBUTIVE_ATTACK(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State TrainMarine(void* data);
+    static BT_NODE::State RetributiveAttack(void* data);
 };
 //----------

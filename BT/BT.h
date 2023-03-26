@@ -42,12 +42,16 @@
 
 	//Unit Actions
 
+	#include "BT_OOP/Unit/UNIT_ACTION_RETRIBUTIVE_ATTACK.h"
+
 		//SCV
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS.h"
 
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_BARRACKS.h"
 
+
+		
 		//#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_MISSILE_TURRET.h"
 
 
@@ -56,5 +60,11 @@
 
 		//Comand Center
 		#include "BT_OOP/Building/CommandCenter/CC_ACTION_TRAIN_WORKER.h"
+
+		//Barracks
+		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_MARINE.h"
+		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MARINE.h"
 		
+	//Global
+		#include "BT_OOP/Global/GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK.h"
 
