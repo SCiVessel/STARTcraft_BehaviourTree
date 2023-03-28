@@ -2,8 +2,8 @@
 #include <unordered_set>
 #include <BWAPI.h>
 
-#define THRESHOLD1_MINERALS 200
-#define THRESHOLD1_UNUSED_SUPPLY 10
+// #define THRESHOLD1_MINERALS 200
+#define EARLY_GAME_SUPPLY_THRESHOLD 10
 
 #define NWANTED_WORKERS_TOTAL 30
 #define NWANTED_WORKERS_FARMING_MINERALS 25
@@ -20,6 +20,8 @@
 #define FACTORY_FACTOR 8
 #define STARPORT_FACTOR 8
 
+#define RETALIATE_DISTANCE 1024
+
 
 class Data {
 public:
@@ -29,6 +31,8 @@ public:
 	int thresholdSupply; 
 
 	int nWantedBarracksTotal;
+	int nWantedFactoryTotal;
+	int nWantedStarportTotal;
 
 	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingMinerals;
 	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingGeysers;

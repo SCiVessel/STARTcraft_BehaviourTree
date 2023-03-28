@@ -16,13 +16,19 @@ bool BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT::IsThereNotEnoughFirebat(void *data)
 {
     Data* pData = (Data*)data;
     
+    auto units = BWAPI::Broodwar->self()->getUnits();
+    int Academies = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Academy, units);
+    if (Academies < 1)
+    {
+        return false;
+    }
+
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 50 or BWAPI::Broodwar->self()->gas() < 25 or unusedSupply < 2)
     {
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int firebats = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Firebat, units);
     int marines = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Marine, units);
 

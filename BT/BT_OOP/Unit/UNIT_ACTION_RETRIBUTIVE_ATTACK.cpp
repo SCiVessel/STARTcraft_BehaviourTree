@@ -35,7 +35,7 @@ BT_NODE::State UNIT_ACTION_RETRIBUTIVE_ATTACK::RetributiveAttack(void* data)
     BWAPI::Unitset enemyUnitsAttacking;
     for (auto& enemy : BWAPI::Broodwar->enemy()->getUnits())
     {
-        if (enemy->exists() && enemy->isAttacking())
+        if (enemy->exists() && enemy->isAttacking() && enemy->isVisible())
         {
             enemyUnitsAttacking.insert(enemy);
             break;
@@ -45,9 +45,12 @@ BT_NODE::State UNIT_ACTION_RETRIBUTIVE_ATTACK::RetributiveAttack(void* data)
     // F2 & ATTACK
     for (auto& unit : F2)
     {
-        if (unit && !unit->isAttackFrame() && !enemyUnitsAttacking.empty())
+        if (unit && !unit->isAttacking() && !enemyUnitsAttacking.empty())
         {
-            unit->attack(enemyUnitsAttacking.getPosition());    //FIXME
+            if (unit->getDistance(*begin(enemyUnitsAttacking)) <= RETALIATE_DISTANCE)
+            {
+                Tools::SmartRightClick(unit, *begin(enemyUnitsAttacking));
+            }
         }
     }
     

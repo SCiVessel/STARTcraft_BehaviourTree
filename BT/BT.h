@@ -55,7 +55,15 @@
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_BARRACKS.h"
 		
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_REFINERY.h"
-		
+
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_ACADEMY.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_ACADEMY.h"
+
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_FACTORY.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_FACTORY.h"
+
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_STARPORT.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_STARPORT.h"
 		
 
 
@@ -72,6 +80,38 @@
 		//Barracks
 		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_MARINE.h"
 		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MARINE.h"
+
+		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT.h"
+		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_FIREBAT.h"
+
+		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_MEDIC.h"
+		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MEDIC.h"
+
+		//Factory
+		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_VULTURE.h"
+		#include "BT_OOP/Building/Factory/FA_ACTION_TRAIN_VULTURE.h"
+
+		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_SIEGETANK.h"
+		#include "BT_OOP/Building/Factory/FA_ACTION_TRAIN_SIEGETANK.h"
+
+		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH.h"
+		#include "BT_OOP/Building/Factory/FA_ACTION_TRAIN_GOLIATH.h"
+
+		//Starport
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_WRAITH.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_WRAITH.h"
+
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_DROPSHIP.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_DROPSHIP.h"
+
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_SCIENCEVESSEL.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_SCIENCEVESSEL.h"
+
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_VALKYRIE.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_VALKYRIE.h"
+
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_BATTLECRUISER.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_BATTLECRUISER.h"
 		
 	//Global
 		#include "BT_OOP/Global/GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK.h"

@@ -12,9 +12,9 @@ StarterBot::StarterBot()
 {
     pData = new Data();
     pData->currMinerals = 0;
-    pData->thresholdMinerals = THRESHOLD1_MINERALS;
+    // pData->thresholdMinerals = THRESHOLD1_MINERALS;
     pData->currSupply = 0;
-    pData->thresholdSupply = THRESHOLD1_UNUSED_SUPPLY;
+    pData->thresholdSupply = EARLY_GAME_SUPPLY_THRESHOLD;
 
     pData->nWantedBarracksTotal = 1;
 
@@ -83,39 +83,99 @@ StarterBot::StarterBot()
     // Starcraft AI BT
     pBT = new BT_DECORATOR("EntryPoint", nullptr);
 
+    //Main Parrallel Sequence
+    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 20);
 
-    //Main Sequence
+        //--------------------------------------------------------------Global--------------------------------------------------------------//
+        
+        //-------------------------------------------------------------Building-------------------------------------------------------------//
+        
+        //Command Center
+        //Train Worker
+        BT_DECO_REPEATER* pTrainingWorkersForeverRepeater = new BT_DECO_REPEATER("RepeatForeverTrainingWorkers", pParallelSeq, 0, true, false, false);
+        BT_DECO_CONDITION_NOT_ENOUGH_WORKERS* pNotEnoughWorkers = new BT_DECO_CONDITION_NOT_ENOUGH_WORKERS("NotEnoughWorkers", pTrainingWorkersForeverRepeater);
+        CC_ACTION_TRAIN_WORKER* pTrainWorker = new CC_ACTION_TRAIN_WORKER("TrainWorker", pNotEnoughWorkers);
 
-    //Parrallel Sequence
-    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 10);
+        //Add-ons
 
-        //Unit Sequence
+
+        //Barracks
+        BT_DECO_REPEATER* pBarracksTrainingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBarracksTraining", pParallelSeq, 0, true, false, true);
+        BT_SELECTOR* pSelectBarracksUnit = new BT_SELECTOR("SelectBarracksUnit", pBarracksTrainingForeverRepeater, 4);
+        
+            //Train Ghost
+            
+
+            //Train Medic
+            BA_DECO_CONDITION_NOT_ENOUGH_MEDIC* pNotEnoughMedic = new BA_DECO_CONDITION_NOT_ENOUGH_MEDIC("NotEnoughMedic", pSelectBarracksUnit);
+            BA_ACTION_TRAIN_MEDIC* pTrainMedic = new BA_ACTION_TRAIN_MEDIC("TrainMedic", pNotEnoughMedic);
+
+            //Train Firebat
+            BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT* pNotEnoughFirebat = new BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT("NotEnoughFirebat", pSelectBarracksUnit);
+            BA_ACTION_TRAIN_FIREBAT* pTrainFirebat = new BA_ACTION_TRAIN_FIREBAT("TrainFirebat", pNotEnoughFirebat);
+
+            //Train Marine
+            BA_DECO_CONDITION_NOT_ENOUGH_MARINE* pNotEnoughMarine = new BA_DECO_CONDITION_NOT_ENOUGH_MARINE("NotEnoughMarine", pSelectBarracksUnit);
+            BA_ACTION_TRAIN_MARINE* pTrainMarine = new BA_ACTION_TRAIN_MARINE("TrainMarine", pNotEnoughMarine);   
+
+
+        //Factory
+        BT_DECO_REPEATER* pFactoryTrainingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFactoryTraining", pParallelSeq, 0, true, false, true);
+        BT_SELECTOR* pSelectFactoryUnit = new BT_SELECTOR("SelectFactoryUnit", pFactoryTrainingForeverRepeater, 3);
+
+            //Train Goliath
+            //BA_DECO_CONDITION_NOT_ENOUGH_MEDIC* pNotEnoughMedic = new BA_DECO_CONDITION_NOT_ENOUGH_MEDIC("NotEnoughMedic", pSelectFactoryUnit);
+            //BA_ACTION_TRAIN_MEDIC* pTrainMedic = new BA_ACTION_TRAIN_MEDIC("TrainMedic", pNotEnoughMedic);
+
+            //Train Vulture
+            FA_DECO_CONDITION_NOT_ENOUGH_VULTURE* pNotEnoughVulture = new FA_DECO_CONDITION_NOT_ENOUGH_VULTURE("NotEnoughVulture", pSelectFactoryUnit);
+            FA_ACTION_TRAIN_VULTURE* pTrainVulture = new FA_ACTION_TRAIN_VULTURE("TrainVulture", pNotEnoughVulture);
+
+            //Train Siege Tank
+            //BA_DECO_CONDITION_NOT_ENOUGH_MARINE* pNotEnoughMarine = new BA_DECO_CONDITION_NOT_ENOUGH_MARINE("NotEnoughMarine", pSelectFactoryUnit);
+            //BA_ACTION_TRAIN_MARINE* pTrainMarine = new BA_ACTION_TRAIN_MARINE("TrainMarine", pNotEnoughMarine);
+
+        //Starport
+        BT_DECO_REPEATER* pStarportTrainingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverStarportTraining", pParallelSeq, 0, true, false, true);
+        BT_SELECTOR* pSelectStarportUnit = new BT_SELECTOR("SelectStarportUnit", pStarportTrainingForeverRepeater, 5);
+
+            //Train Battlecruiser
+            //BA_DECO_CONDITION_NOT_ENOUGH_MEDIC* pNotEnoughMedic = new BA_DECO_CONDITION_NOT_ENOUGH_MEDIC("NotEnoughMedic", pSelectFactoryUnit);
+            //BA_ACTION_TRAIN_MEDIC* pTrainMedic = new BA_ACTION_TRAIN_MEDIC("TrainMedic", pNotEnoughMedic);
+
+            //Train Science Vessel
+            //BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT* pNotEnoughFirebat = new BA_DECO_CONDITION_NOT_ENOUGH_FIREBAT("NotEnoughFirebat", pSelectFactoryUnit);
+            //BA_ACTION_TRAIN_FIREBAT* pTrainFirebat = new BA_ACTION_TRAIN_FIREBAT("TrainFirebat", pNotEnoughFirebat);
+
+            //Train Valkyrie
+            //BA_DECO_CONDITION_NOT_ENOUGH_MARINE* pNotEnoughMarine = new BA_DECO_CONDITION_NOT_ENOUGH_MARINE("NotEnoughMarine", pSelectFactoryUnit);
+            //BA_ACTION_TRAIN_MARINE* pTrainMarine = new BA_ACTION_TRAIN_MARINE("TrainMarine", pNotEnoughMarine);
+
+            //Train Dropship
+
+            //Train Wraith
+            SP_DECO_CONDITION_NOT_ENOUGH_WRAITH* pNotEnoughWraith = new SP_DECO_CONDITION_NOT_ENOUGH_WRAITH("NotEnoughWraith", pSelectStarportUnit);
+            SP_ACTION_TRAIN_WRAITH* pTrainWraith = new SP_ACTION_TRAIN_WRAITH("TrainWraith", pNotEnoughWraith);
+
+        //---------------------------------------------------------------Unit---------------------------------------------------------------//
         
         //SCV
         // Farming Sequence
         BT_DECO_REPEATER* pFarmingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarming", pParallelSeq, 0, true, false, true);
         BT_SELECTOR* pCheckGeyserAndMineral = new BT_SELECTOR("CheckGeyserAndMineral", pFarmingForeverRepeater, 2);
             //Farming Vespene Gas forever
-            //BT_DECO_REPEATER* pFarmingGasForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarmingGas", pParallelSeq, 0, true, false, false);
             SCV_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_GEYSER* pNotEnoughWorkersFarmingGeyser = new SCV_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_GEYSER("NotEnoughWorkersFarmingGeyser", pCheckGeyserAndMineral);
             SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY* pSendWorkerToGeyser = new SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY("SendWorkerToRefinery", pNotEnoughWorkersFarmingGeyser);
             //Farming Minerals forever
-            //BT_DECO_REPEATER* pFarmingMineralsForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarmingMinerals", pParallelSeq, 0, true, false, false);
             BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS* pNotEnoughWorkersFarmingMinerals = new BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS("NotEnoughWorkersFarmingMinerals", pCheckGeyserAndMineral);
             SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS* pSendWorkerToMinerals = new SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS("SendWorkerToMinerals", pNotEnoughWorkersFarmingMinerals);
-
-            //Training Workers
-            BT_DECO_REPEATER* pTrainingWorkersForeverRepeater = new BT_DECO_REPEATER("RepeatForeverTrainingWorkers", pParallelSeq, 0, true, false, false);
-            BT_DECO_CONDITION_NOT_ENOUGH_WORKERS* pNotEnoughWorkers = new BT_DECO_CONDITION_NOT_ENOUGH_WORKERS("NotEnoughWorkers", pTrainingWorkersForeverRepeater);
-            CC_ACTION_TRAIN_WORKER* pTrainWorker = new CC_ACTION_TRAIN_WORKER("TrainWorker", pNotEnoughWorkers);
-
-    
-            //Build Additional Supply Provider
+        
+        // Constructing Sequence
+            //Build Supply Provider
             BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, false);
             BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY* pNotEnoughSupply = new BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY("NotEnoughSupply", pBuildSupplyProviderForeverRepeater);
             SCV_ACTION_BUILD_SUPPLY_PROVIDER* pBuildSupplyProvider = new SCV_ACTION_BUILD_SUPPLY_PROVIDER("BuildSupplyProvider", pNotEnoughSupply);
     
-
             //Build Barracks
             BT_DECO_REPEATER* pBuildBarracksForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildBarracks", pParallelSeq, 0, true, false, true);
             BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS* pNotEnoughBarracks = new BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS("NotEnoughBarracks", pBuildBarracksForeverRepeater);
@@ -124,8 +184,7 @@ StarterBot::StarterBot()
                 
                 BT_ACTION_WAIT* pBarrackWait = new BT_ACTION_WAIT("WaitForResponse", pBuildBarracksAndWait, 3);
                 SCV_ACTION_BUILD_BARRACKS* pBuildBarracks = new SCV_ACTION_BUILD_BARRACKS("BuildBarracks", pBuildBarracksAndWait);
-                
-
+            
             //Build Vespene Geyser
             BT_DECO_REPEATER* pBuildVespeneGeyserForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildVespeneGeyser", pParallelSeq, 0, true, false, true);
             SCV_DECO_CONDITION_NOT_ENOUGH_REFINERY* pNotEnoughVespeneGeyser = new SCV_DECO_CONDITION_NOT_ENOUGH_REFINERY("NotEnoughVespeneGeyser", pBuildVespeneGeyserForeverRepeater);
@@ -135,24 +194,44 @@ StarterBot::StarterBot()
                 BT_ACTION_WAIT* pVespeneGeyserWait = new BT_ACTION_WAIT("WaitForResponse", pBuildVespeneGeyserAndWait, 3);
                 SCV_ACTION_BUILD_REFINERY* pBuildVespeneGeyser = new SCV_ACTION_BUILD_REFINERY("BuildVespeneGeyser", pBuildVespeneGeyserAndWait);
 
-            //Build
+            //Build Academy
+            BT_DECO_REPEATER* pBuildAcademyForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildAcademy", pParallelSeq, 0, true, false, true);
+            SCV_DECO_CONDITION_NOT_ENOUGH_ACADEMY* pNotEnoughAcademy = new SCV_DECO_CONDITION_NOT_ENOUGH_ACADEMY("NotEnoughAcademy", pBuildAcademyForeverRepeater);
 
+                BT_SEQUENCER* pBuildAcademyAndWait = new BT_SEQUENCER("BuildAcademyAndWait", pNotEnoughAcademy, 2);
 
+                BT_ACTION_WAIT* pAcademyWait = new BT_ACTION_WAIT("WaitForResponse", pBuildAcademyAndWait, 3);
+                SCV_ACTION_BUILD_ACADEMY* pBuildAcademy = new SCV_ACTION_BUILD_ACADEMY("BuildVespeneGeyser", pBuildAcademyAndWait);
 
-            //Train Marine
-            BT_DECO_REPEATER* pTrainingMarineForeverRepeater = new BT_DECO_REPEATER("RepeatForeverTrainingMarine", pParallelSeq, 0, true, false, false);
-            BA_DECO_CONDITION_NOT_ENOUGH_MARINE* pNotEnoughMarine = new BA_DECO_CONDITION_NOT_ENOUGH_MARINE("NotEnoughMarine", pTrainingMarineForeverRepeater);
-            BA_ACTION_TRAIN_MARINE* pTrainMarine = new BA_ACTION_TRAIN_MARINE("TrainMarine", pNotEnoughMarine);
+            //Build Factory
+            BT_DECO_REPEATER* pBuildFactoryForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildFactory", pParallelSeq, 0, true, false, true);
+            SCV_DECO_CONDITION_NOT_ENOUGH_FACTORY* pNotEnoughFactory = new SCV_DECO_CONDITION_NOT_ENOUGH_FACTORY("NotEnoughFactory", pBuildFactoryForeverRepeater);
 
+                BT_SEQUENCER* pBuildFactoryAndWait = new BT_SEQUENCER("BuildFactoryAndWait", pNotEnoughFactory, 2);
 
-            //Retributive Attack
-            BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, true);
-            GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pRetributionForeverRepeater);
+                BT_ACTION_WAIT* pFactoryWait = new BT_ACTION_WAIT("WaitForResponse", pBuildFactoryAndWait, 3);
+                SCV_ACTION_BUILD_FACTORY* pBuildFactory = new SCV_ACTION_BUILD_FACTORY("BuildFactory", pBuildFactoryAndWait);
 
-                BT_SELECTOR* pRetributiveAttackAndWait = new BT_SELECTOR("RetributiveAttackAndWait", pIsUnderAttack, 2); //FIXME
+            //Build Starport
+            BT_DECO_REPEATER* pBuildStarportForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildStarport", pParallelSeq, 0, true, false, true);
+            SCV_DECO_CONDITION_NOT_ENOUGH_STARPORT* pNotEnoughStarport = new SCV_DECO_CONDITION_NOT_ENOUGH_STARPORT("NotEnoughStarport", pBuildStarportForeverRepeater);
 
-                BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
-                UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
+                BT_SEQUENCER* pBuildStarportAndWait = new BT_SEQUENCER("BuildStarportAndWait", pNotEnoughStarport, 2);
+
+                BT_ACTION_WAIT* pStarportWait = new BT_ACTION_WAIT("WaitForResponse", pBuildStarportAndWait, 3);
+                SCV_ACTION_BUILD_STARPORT* pBuildStarport = new SCV_ACTION_BUILD_STARPORT("BuildStarport", pBuildStarportAndWait);
+
+            
+
+        //For all Units:
+        //Retributive Attack
+        BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, true);
+        GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pRetributionForeverRepeater);
+
+            BT_PARALLEL_SELECTOR* pRetributiveAttackAndWait = new BT_PARALLEL_SELECTOR("RetributiveAttackAndWait", pIsUnderAttack, 2); //FIXME
+
+            BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
+            UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
 
 
     /*
@@ -218,14 +297,20 @@ void StarterBot::onFrame()
         if (BWAPI::Broodwar->elapsedTime() <= EARLY_GAME)
         {
             pData->nWantedBarracksTotal = 1;
+            pData->nWantedFactoryTotal = 1;
+            pData->nWantedStarportTotal = 1;
         }
         else if (BWAPI::Broodwar->elapsedTime() <= MID_GAME)
         {
             pData->nWantedBarracksTotal = 3;
+            pData->nWantedFactoryTotal = 2;
+            pData->nWantedStarportTotal = 1;
         }
         else
         {
             pData->nWantedBarracksTotal = 5;
+            pData->nWantedFactoryTotal = 4;
+            pData->nWantedStarportTotal = 3;
         }
 
         //Supply Depot
@@ -237,13 +322,13 @@ void StarterBot::onFrame()
             for (auto& unit : BWAPI::Broodwar->self()->getUnits())
             {
                 // if the unit is of the correct type, and it actually has been constructed, return it
-                if (unit->getType() == BWAPI::UnitTypes::Terran_Barracks) {
+                if (unit->getType() == BWAPI::UnitTypes::Terran_Barracks && unit->isCompleted()) {
                     numBarracks += 1;
                 }
-                else if (unit->getType() == BWAPI::UnitTypes::Terran_Factory) {
+                else if (unit->getType() == BWAPI::UnitTypes::Terran_Factory && unit->isCompleted()) {
                     numFactories += 1;
                 }
-                else if (unit->getType() == BWAPI::UnitTypes::Terran_Starport) {
+                else if (unit->getType() == BWAPI::UnitTypes::Terran_Starport && unit->isCompleted()) {
                     numStarPorts += 1;
                 }
             }
@@ -373,7 +458,7 @@ void StarterBot::onUnitDestroy(BWAPI::Unit unit)
     {
         for (int idx = 0; idx < pData->CommandCenters.size(); idx++)
         {
-            if (pData->CommandCenters[idx] == unit)
+            if (pData->CommandCenters[idx] == unit) //FIXME
             {
                 pData->CommandCenters.erase(pData->CommandCenters.begin() + idx);
                 pData->tilePositionCommandCenters.erase(pData->tilePositionCommandCenters.begin() + idx);
