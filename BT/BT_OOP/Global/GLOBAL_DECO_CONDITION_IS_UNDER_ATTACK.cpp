@@ -19,7 +19,7 @@ bool GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK::IsUnderAttack(void *data)
     // Check if we are being attacked
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {
-        // if the unit is of the correct type, and it actually has been constructed, return it
+        // WE ARE UNDER ATTACK
         if (unit->isUnderAttack())
         {
             return true;

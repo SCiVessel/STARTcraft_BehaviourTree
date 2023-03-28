@@ -18,8 +18,45 @@ StarterBot::StarterBot()
 
     pData->nWantedBarracksTotal = 1;
 
-    pData->nWantedWorkersTotal = NWANTED_WORKERS_TOTAL;
-    pData->nWantedWorkersFarmingMinerals = NWANTED_WORKERS_FARMING_MINERALS;
+    // pData->nWantedWorkersTotal = NWANTED_WORKERS_TOTAL;
+    // pData->nWantedWorkersFarmingMinerals = NWANTED_WORKERS_FARMING_MINERALS;
+
+    // initalize the list to keep the workers to each command center
+    std::unordered_set<BWAPI::Unit> command_center_mineralsFarmer_list;
+    pData->unitsFarmingMinerals.push_back(command_center_mineralsFarmer_list);
+    std::unordered_set<BWAPI::Unit> command_center_geysersFarmer_list;
+    pData->unitsFarmingGeysers.push_back(command_center_geysersFarmer_list);
+    int nWWFM = 18;
+    pData->nWantedWorkersFarmingMinerals.push_back(nWWFM);
+    int nWWFG = 3;
+    pData->nWantedWorkersFarmingGeysers.push_back(nWWFG);
+    int nWWT = nWWFM + nWWFG;
+    pData->nWantedWorkersTotal.push_back(nWWT);
+
+    // find initial command center position
+    BWAPI::Unitset unitSet = BWAPI::Broodwar->self()->getUnits();
+    for (auto& unit : unitSet)
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Command_Center)
+        {
+            pData->CommandCenters.push_back(unit);
+            pData->tilePositionCommandCenters.push_back(unit->getTilePosition());
+            pData->positionCommandCenters.push_back(unit->getPosition());
+
+        /*    BWAPI::Unitset temp = unit->getUnitsInRadius(128, BWAPI::Filter::IsResourceContainer);
+            if (!temp.empty())
+            {
+                for (auto& resource : temp) {
+                    if (resource->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser)
+                    {
+                        pData->availableGeysers.insert(resource);
+                    }
+                }
+            }
+        */
+            break;
+        }
+    }
 
     pBtTest = nullptr;
     /*
@@ -48,14 +85,23 @@ StarterBot::StarterBot()
 
 
     //Main Sequence
-    BT_SEQUENCER* pMain = new BT_SEQUENCER("MainSequence", pBT, 2);
 
-        //Parrallel Sequence
-        BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pMain, 10);
+    //Parrallel Sequence
+    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 10);
 
+        //Unit Sequence
+        
+        //SCV
+        // Farming Sequence
+        BT_DECO_REPEATER* pFarmingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarming", pParallelSeq, 0, true, false, true);
+        BT_SELECTOR* pCheckGeyserAndMineral = new BT_SELECTOR("CheckGeyserAndMineral", pFarmingForeverRepeater, 2);
+            //Farming Vespene Gas forever
+            //BT_DECO_REPEATER* pFarmingGasForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarmingGas", pParallelSeq, 0, true, false, false);
+            SCV_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_GEYSER* pNotEnoughWorkersFarmingGeyser = new SCV_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_GEYSER("NotEnoughWorkersFarmingGeyser", pCheckGeyserAndMineral);
+            SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY* pSendWorkerToGeyser = new SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY("SendWorkerToRefinery", pNotEnoughWorkersFarmingGeyser);
             //Farming Minerals forever
-            BT_DECO_REPEATER* pFarmingMineralsForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarmingMinerals", pParallelSeq, 0, true, false, false);
-            BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS* pNotEnoughWorkersFarmingMinerals = new BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS("NotEnoughWorkersFarmingMinerals", pFarmingMineralsForeverRepeater);
+            //BT_DECO_REPEATER* pFarmingMineralsForeverRepeater = new BT_DECO_REPEATER("RepeatForeverFarmingMinerals", pParallelSeq, 0, true, false, false);
+            BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS* pNotEnoughWorkersFarmingMinerals = new BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS("NotEnoughWorkersFarmingMinerals", pCheckGeyserAndMineral);
             SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS* pSendWorkerToMinerals = new SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS("SendWorkerToMinerals", pNotEnoughWorkersFarmingMinerals);
 
             //Training Workers
@@ -72,12 +118,25 @@ StarterBot::StarterBot()
 
             //Build Barracks
             BT_DECO_REPEATER* pBuildBarracksForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildBarracks", pParallelSeq, 0, true, false, true);
-            BT_SEQUENCER* pBuildBarracksAndWait = new BT_SEQUENCER("BuildBarracksAndWait", pBuildBarracksForeverRepeater, 2);
+            BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS* pNotEnoughBarracks = new BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS("NotEnoughBarracks", pBuildBarracksForeverRepeater);
 
-                BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS* pNotEnoughBarracks = new BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS("NotEnoughBarracks", pBuildBarracksAndWait);
-                SCV_ACTION_BUILD_BARRACKS* pBuildBarracks = new SCV_ACTION_BUILD_BARRACKS("BuildBarracks", pNotEnoughBarracks);
+                BT_SEQUENCER* pBuildBarracksAndWait = new BT_SEQUENCER("BuildBarracksAndWait", pNotEnoughBarracks, 2);
+                
+                BT_ACTION_WAIT* pBarrackWait = new BT_ACTION_WAIT("WaitForResponse", pBuildBarracksAndWait, 3);
+                SCV_ACTION_BUILD_BARRACKS* pBuildBarracks = new SCV_ACTION_BUILD_BARRACKS("BuildBarracks", pBuildBarracksAndWait);
+                
 
-                BT_ACTION_WAIT* pBarrackWait = new BT_ACTION_WAIT("WaitForResponse", pBuildBarracksAndWait, 0.2);
+            //Build Vespene Geyser
+            BT_DECO_REPEATER* pBuildVespeneGeyserForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildVespeneGeyser", pParallelSeq, 0, true, false, true);
+            SCV_DECO_CONDITION_NOT_ENOUGH_REFINERY* pNotEnoughVespeneGeyser = new SCV_DECO_CONDITION_NOT_ENOUGH_REFINERY("NotEnoughVespeneGeyser", pBuildVespeneGeyserForeverRepeater);
+
+                BT_SEQUENCER* pBuildVespeneGeyserAndWait = new BT_SEQUENCER("BuildGeyserAndWait", pNotEnoughVespeneGeyser, 2);
+
+                BT_ACTION_WAIT* pVespeneGeyserWait = new BT_ACTION_WAIT("WaitForResponse", pBuildVespeneGeyserAndWait, 3);
+                SCV_ACTION_BUILD_REFINERY* pBuildVespeneGeyser = new SCV_ACTION_BUILD_REFINERY("BuildVespeneGeyser", pBuildVespeneGeyserAndWait);
+
+            //Build
+
 
 
             //Train Marine
@@ -87,13 +146,15 @@ StarterBot::StarterBot()
 
 
             //Retributive Attack
-            BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, false);
+            BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, true);
             GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pRetributionForeverRepeater);
-            UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pIsUnderAttack);
+
+                BT_SELECTOR* pRetributiveAttackAndWait = new BT_SELECTOR("RetributiveAttackAndWait", pIsUnderAttack, 2); //FIXME
+
+                BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
+                UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
 
 
-        //Cease action
-        BT_ACTION_WAIT* pWait = new BT_ACTION_WAIT("CeaseAction", pMain, 0.5);
     /*
     //Build Missile Turret (BUG)
     BT_DECO_REPEATER* pBuildMissileTurretForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildMissileTurret", pParallelSeq, 0, true, false, false);
@@ -188,6 +249,35 @@ void StarterBot::onFrame()
             }
             pData->thresholdSupply = int(BARRACKS_FACTOR * numBarracks + FACTORY_FACTOR * numFactories + STARPORT_FACTOR * numStarPorts);
         }
+
+        // Update the available geysers around the command center
+            // Get Geysers near the Command Centers and see if it has a Refinery
+            // Get all player units
+            BWAPI::Unitset unitSet = BWAPI::Broodwar->self()->getUnits();
+            std::unordered_set<BWAPI::Unit> availableGeysers;
+            for (auto& unit : unitSet)
+            {
+                if (unit->getType() == BWAPI::UnitTypes::Terran_Command_Center)
+                {
+                    BWAPI::Unitset temp = unit->getUnitsInRadius(128, BWAPI::Filter::IsResourceContainer);
+                    if (!temp.empty())
+                    {
+                        for (auto& resource : temp) {
+                            if (resource->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser)
+                            {
+                                availableGeysers.insert(resource);
+                            }
+                        }
+                    }
+                }
+
+                if (unit->getType() == BWAPI::UnitTypes::Terran_Refinery)
+                {
+
+                }
+            }
+
+            pData->availableGeysers = availableGeysers;
         
     
 }
@@ -269,8 +359,33 @@ void StarterBot::onEnd(bool isWinner)
 void StarterBot::onUnitDestroy(BWAPI::Unit unit)
 {
     //if the unit is farming then remove it from data structure
-    if (pData->unitsFarmingMinerals.contains(unit)) pData->unitsFarmingMinerals.erase(unit);
-    if (pData->unitsFarmingGeysers.contains(unit)) pData->unitsFarmingGeysers.erase(unit);
+    for (int i = 0; i < pData->unitsFarmingMinerals.size(); i++)
+    {
+        if (pData->unitsFarmingMinerals[i].contains(unit)) pData->unitsFarmingMinerals[i].erase(unit);
+    }
+    for (int j = 0; j < pData->unitsFarmingMinerals.size(); j++)
+    {
+        if (pData->unitsFarmingGeysers[j].contains(unit)) pData->unitsFarmingGeysers[j].erase(unit);
+    }
+
+    //if the unit is a command center
+    if (unit->getType() == BWAPI::UnitTypes::Terran_Command_Center)
+    {
+        for (int idx = 0; idx < pData->CommandCenters.size(); idx++)
+        {
+            if (pData->CommandCenters[idx] == unit)
+            {
+                pData->CommandCenters.erase(pData->CommandCenters.begin() + idx);
+                pData->tilePositionCommandCenters.erase(pData->tilePositionCommandCenters.begin() + idx);
+                pData->positionCommandCenters.erase(pData->positionCommandCenters.begin() + idx);
+                pData->unitsFarmingMinerals.erase(pData->unitsFarmingMinerals.begin() + idx);
+                pData->unitsFarmingGeysers.erase(pData->unitsFarmingGeysers.begin() + idx);
+            }
+        }
+    }
+
+    // if (pData->unitsFarmingMinerals.contains(unit)) pData->unitsFarmingMinerals.erase(unit);
+    // if (pData->unitsFarmingGeysers.contains(unit)) pData->unitsFarmingGeysers.erase(unit);
 }
 
 // Called whenever a unit is morphed, with a pointer to the unit

@@ -36,7 +36,7 @@ bool BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS::IsThereNotEnoughBarracks(void *data)
     // Get the amount of Supply Depots
    
     // Do nothing ig we have no supply depots
-    if (Tools::GetTotalSupply(false) <= SUPPLY_PROVIDED_BY_CC)
+    if (Tools::GetTotalSupply(true) <= SUPPLY_PROVIDED_BY_CC)
     {
         return false;
     }
@@ -45,7 +45,7 @@ bool BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS::IsThereNotEnoughBarracks(void *data)
     // If the worker is on the task
     for (auto& unit : unitSet)
     {
-        if (unit->getType().isWorker() && !unit->isIdle() && unit->getBuildType() == BWAPI::UnitTypes::Terran_Barracks)
+        if (unit->getType().isWorker() && unit->isConstructing() && unit->getBuildType() == BWAPI::UnitTypes::Terran_Barracks)
         {
             existingBarracks += 1;
             

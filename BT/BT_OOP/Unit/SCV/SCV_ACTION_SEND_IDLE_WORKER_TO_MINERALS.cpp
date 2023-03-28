@@ -29,14 +29,43 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
             // Get the closest mineral to this worker unit
             BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
 
+            // Get the closet command center
+            BWAPI::Unit closetCommandCenter = unit->getClosestUnit(BWAPI::Filter::IsResourceDepot);
+            BWAPI::TilePosition locationCommandCenter = closetCommandCenter->getTilePosition();
+
+            int indexCommandCenter = 0;
+            for (int i = 0; i < pData->tilePositionCommandCenters.size(); i++)
+            {
+                if (pData->tilePositionCommandCenters[i] == locationCommandCenter)
+                {
+                    indexCommandCenter = i;
+                    break;
+                }
+            }
+
+            // If the command center already has sufficient workers, move to another command center
+            if (pData->unitsFarmingMinerals[indexCommandCenter].size() >= pData->nWantedWorkersFarmingMinerals[indexCommandCenter])
+            {
+                for (int temp = 0; temp < pData->tilePositionCommandCenters.size(); temp++)
+                {
+                    if (pData->unitsFarmingMinerals[temp].size() < pData->nWantedWorkersFarmingMinerals[temp])
+                    {
+                        unit->rightClick(pData->positionCommandCenters[temp]);
+                        return BT_NODE::SUCCESS;
+                    }
+                }
+                return BT_NODE::FAILURE;
+            }
+
             // If a valid mineral was found, right click it with the unit in order to start harvesting
             if (closestMineral) {
                 unit->rightClick(closestMineral);
-                pData->unitsFarmingMinerals.insert(unit);
+                // Insert the worker to the list of the designated base
+                pData->unitsFarmingMinerals[indexCommandCenter].insert(unit);
+                return BT_NODE::SUCCESS;
             }
         }
     }
 
-    return BT_NODE::SUCCESS;
-    //return BT_NODE::FAILURE;
+    return BT_NODE::FAILURE;
 }

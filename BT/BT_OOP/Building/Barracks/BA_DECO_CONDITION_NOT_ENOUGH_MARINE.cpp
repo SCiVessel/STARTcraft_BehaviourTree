@@ -15,9 +15,9 @@ std::string BA_DECO_CONDITION_NOT_ENOUGH_MARINE::GetDescription()
 bool BA_DECO_CONDITION_NOT_ENOUGH_MARINE::IsThereNotEnoughMarine(void *data)
 {
     Data* pData = (Data*)data;
-    
-    // Do nothing if we have NOT ENOUGH MINERALS
-    if (BWAPI::Broodwar->self()->minerals() < 50)
+
+    int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
+    if (BWAPI::Broodwar->self()->minerals() < 50 or unusedSupply < 2)
     {
         return false;
     }

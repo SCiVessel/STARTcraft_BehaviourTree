@@ -25,26 +25,30 @@ BT_NODE::State SCV_ACTION_BUILD_BARRACKS::BuildBarracks(void* data)
 
     // Get a unit that we own that is of the given type so it can build
     // If we can't find a valid builder unit, then we have to cancel the building
-    auto it = pData->unitsFarmingMinerals.begin();
-    if (it == pData->unitsFarmingMinerals.end())
+    auto it = pData->unitsFarmingMinerals[0].begin();
+    if (it == pData->unitsFarmingMinerals[0].end())
     {
         return BT_NODE::FAILURE;
     }
     BWAPI::Unit builder = *it;
-    
+
     // Get a location that we want to build the building next to
     BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
 
     // Ask BWAPI for a building location near the desired position for the type
-    int maxBuildRange = 256;
+    int maxBuildRange = 128;
     bool buildingOnCreep = BuildBarracks.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(BuildBarracks, desiredPos, maxBuildRange, buildingOnCreep);
+    if (!BWAPI::Broodwar->getUnitsOnTile(buildPos).empty())
+    {
+        return  BT_NODE::FAILURE;
+    }
 
     const bool startedBuilding = builder->build(BuildBarracks, buildPos);
 
 
     // Remove from the list only after the building process starts
-    pData->unitsFarmingMinerals.erase(it);
+    pData->unitsFarmingMinerals[0].erase(it);
 
     if (startedBuilding)
         BWAPI::Broodwar->printf("Started Building Barracks");

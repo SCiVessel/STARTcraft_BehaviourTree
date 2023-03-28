@@ -38,20 +38,23 @@ BT_NODE::State UNIT_ACTION_RETRIBUTIVE_ATTACK::RetributiveAttack(void* data)
         if (enemy->exists() && enemy->isAttacking())
         {
             enemyUnitsAttacking.insert(enemy);
+            break;
         }
     }
 
     // F2 & ATTACK
     for (auto& unit : F2)
     {
-        if (unit && !enemyUnitsAttacking.empty())
+        if (unit && !unit->isAttackFrame() && !enemyUnitsAttacking.empty())
         {
-            unit->attack(enemyUnitsAttacking.getPosition());
+            unit->attack(enemyUnitsAttacking.getPosition());    //FIXME
         }
     }
     
-    BWAPI::Error error = BWAPI::Broodwar->getLastError();
+    /*BWAPI::Error error = BWAPI::Broodwar->getLastError();
     if (error != BWAPI::Errors::None)
         return BT_NODE::FAILURE;
-    else return BT_NODE::SUCCESS;
+    else return BT_NODE::SUCCESS;*/
+
+    return BT_NODE::SUCCESS;
 }

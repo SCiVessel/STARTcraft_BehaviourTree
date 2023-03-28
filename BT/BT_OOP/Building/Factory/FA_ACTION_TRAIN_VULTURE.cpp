@@ -1,36 +1,47 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "FA_ACTION_TRAIN_VULTURE.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
+FA_ACTION_TRAIN_VULTURE::FA_ACTION_TRAIN_VULTURE(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State FA_ACTION_TRAIN_VULTURE::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(TrainVulture(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string FA_ACTION_TRAIN_VULTURE::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "TRAIN VULTURE";
 }
 
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State FA_ACTION_TRAIN_VULTURE::TrainVulture(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    std::vector<BWAPI::Unit> factories;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        // if the unit is of the correct type, and it actually has been constructed, return it
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Factory && unit->isCompleted())
+        {
+            factories.push_back(unit);
+        }
+    }
+
+    for (auto& unit : factories)
+    {
+        if (unit && !unit->isTraining())
+        {
+            unit->train(BWAPI::UnitTypes::Terran_Vulture);
+            BWAPI::Error error = BWAPI::Broodwar->getLastError();
+            if (error != BWAPI::Errors::None)
+                return BT_NODE::FAILURE;
+            else return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

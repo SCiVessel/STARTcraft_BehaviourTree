@@ -32,8 +32,6 @@ BT_NODE::State BA_ACTION_TRAIN_MARINE::TrainMarine(void* data)
         }
     }
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
     for (auto& unit : barracks)
     {
         if (unit && !unit->isTraining()) 
@@ -46,6 +44,5 @@ BT_NODE::State BA_ACTION_TRAIN_MARINE::TrainMarine(void* data)
         }
     }
     
-
     return BT_NODE::FAILURE;
 }

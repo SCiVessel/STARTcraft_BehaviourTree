@@ -19,5 +19,13 @@ bool BT_DECO_CONDITION_NOT_ENOUGH_WORKERS::IsThereNotEnoughWorkers(void *data)
     const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
     const int workersOwned = Tools::CountUnitsOfType(workerType, BWAPI::Broodwar->self()->getUnits());
 
-    return workersOwned <pData->nWantedWorkersTotal;
+    int sumWanted = 0;
+    {
+        for (int i = 0; i < pData->nWantedWorkersTotal.size(); i++)
+        {
+            sumWanted += pData->nWantedWorkersTotal[i];
+        }
+    }
+
+    return workersOwned < sumWanted;
 }

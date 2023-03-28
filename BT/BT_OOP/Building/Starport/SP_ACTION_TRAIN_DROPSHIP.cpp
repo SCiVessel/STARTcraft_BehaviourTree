@@ -1,36 +1,47 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "SP_ACTION_TRAIN_DROPSHIP.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+SP_ACTION_TRAIN_DROPSHIP::SP_ACTION_TRAIN_DROPSHIP(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State SP_ACTION_TRAIN_DROPSHIP::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(TrainDropship(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string SP_ACTION_TRAIN_DROPSHIP::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "TRAIN DROPSHIP";
 }
 
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State SP_ACTION_TRAIN_DROPSHIP::TrainDropship(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    std::vector<BWAPI::Unit> starport;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        // if the unit is of the correct type, and it actually has been constructed, return it
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Starport && unit->isCompleted())
+        {
+            starport.push_back(unit);
+        }
+    }
+
+    for (auto& unit : starport)
+    {
+        if (unit && !unit->isTraining())
+        {
+            unit->train(BWAPI::UnitTypes::Terran_Dropship);
+            BWAPI::Error error = BWAPI::Broodwar->getLastError();
+            if (error != BWAPI::Errors::None)
+                return BT_NODE::FAILURE;
+            else return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

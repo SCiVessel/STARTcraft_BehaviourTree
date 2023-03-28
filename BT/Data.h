@@ -3,7 +3,7 @@
 #include <BWAPI.h>
 
 #define THRESHOLD1_MINERALS 200
-#define THRESHOLD1_UNUSED_SUPPLY 6
+#define THRESHOLD1_UNUSED_SUPPLY 10
 
 #define NWANTED_WORKERS_TOTAL 30
 #define NWANTED_WORKERS_FARMING_MINERALS 25
@@ -15,10 +15,10 @@
 #define SUPPLY_PROVIDED_BY_CC 20
 #define SUPPLY_PROVIDED_BY_SD 16
 
-//Define army factor
-#define BARRACKS_FACTOR 2
-#define FACTORY_FACTOR 3
-#define STARPORT_FACTOR 3
+//Define army factor for supplies
+#define BARRACKS_FACTOR 6
+#define FACTORY_FACTOR 8
+#define STARPORT_FACTOR 8
 
 
 class Data {
@@ -28,11 +28,25 @@ public:
 	int currSupply;
 	int thresholdSupply; 
 
-	int nWantedWorkersTotal;
-	int nWantedWorkersFarmingMinerals;
-
 	int nWantedBarracksTotal;
 
-	std::unordered_set<BWAPI::Unit> unitsFarmingMinerals;
-	std::unordered_set<BWAPI::Unit> unitsFarmingGeysers;
+	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingMinerals;
+	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingGeysers;
+
+	std::vector<int> nWantedWorkersTotal;
+	std::vector<int> nWantedWorkersFarmingMinerals;
+	std::vector<int> nWantedWorkersFarmingGeysers;
+
+	std::vector<BWAPI::Unit> CommandCenters;
+	std::vector<BWAPI::TilePosition> tilePositionCommandCenters;
+	std::vector<BWAPI::Position> positionCommandCenters;
+
+	// int nWantedWorkersTotal;
+	// int nWantedWorkersFarmingMinerals;
+	// int nWantedWorkersFarmingGeysers;
+
+	// std::unordered_set<BWAPI::Unit> unitsFarmingMinerals;
+	// std::unordered_set<BWAPI::Unit> unitsFarmingGeysers;
+
+	std::unordered_set<BWAPI::Unit> availableGeysers;
 };
