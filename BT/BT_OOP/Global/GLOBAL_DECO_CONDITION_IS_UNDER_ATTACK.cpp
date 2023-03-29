@@ -22,9 +22,14 @@ bool GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK::IsUnderAttack(void *data)
         // WE ARE UNDER ATTACK
         if (unit->isUnderAttack())
         {
+            pData->now_underattack = true;
+            pData->at_war = true;
+
             return true;
         }
     }
+
+    pData->now_underattack = false;
 
     return false;
 }

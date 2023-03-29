@@ -21,6 +21,11 @@ StarterBot::StarterBot()
     // pData->nWantedWorkersTotal = NWANTED_WORKERS_TOTAL;
     // pData->nWantedWorkersFarmingMinerals = NWANTED_WORKERS_FARMING_MINERALS;
 
+    pData->not_underattack_counter = 0;
+    pData->pre_underattack = false;
+    pData->now_underattack = false;
+    pData->at_war = true;
+
     // initalize the list to keep the workers to each command center
     std::unordered_set<BWAPI::Unit> command_center_mineralsFarmer_list;
     pData->unitsFarmingMinerals.push_back(command_center_mineralsFarmer_list);
@@ -172,10 +177,14 @@ StarterBot::StarterBot()
         
         // Constructing Sequence
             //Build Supply Provider
-            BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, false);
+            BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, true);
             BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY* pNotEnoughSupply = new BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY("NotEnoughSupply", pBuildSupplyProviderForeverRepeater);
-            SCV_ACTION_BUILD_SUPPLY_PROVIDER* pBuildSupplyProvider = new SCV_ACTION_BUILD_SUPPLY_PROVIDER("BuildSupplyProvider", pNotEnoughSupply);
-    
+
+                BT_SEQUENCER* pBuildSupplyAndWait = new BT_SEQUENCER("BuildSupplyAndWait", pNotEnoughSupply, 2);
+
+                BT_ACTION_WAIT* pSupplyWait = new BT_ACTION_WAIT("WaitForResponse", pBuildSupplyAndWait, 3);
+                SCV_ACTION_BUILD_SUPPLY_PROVIDER* pBuildSupplyProvider = new SCV_ACTION_BUILD_SUPPLY_PROVIDER("BuildSupplyProvider", pBuildSupplyAndWait);
+
             //Build Barracks
             BT_DECO_REPEATER* pBuildBarracksForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildBarracks", pParallelSeq, 0, true, false, true);
             BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS* pNotEnoughBarracks = new BT_DECO_CONDITION_NOT_ENOUGH_BARRACKS("NotEnoughBarracks", pBuildBarracksForeverRepeater);
@@ -233,6 +242,10 @@ StarterBot::StarterBot()
             BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
             UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
 
+        //Counter-Attack
+        BT_DECO_REPEATER* pCounterAttackForeverRepeater = new BT_DECO_REPEATER("RepeatForeverCounterAttack", pParallelSeq, 0, true, false, true);
+        UNIT_DECO_CONDITION_GO_COUNTER_ATTACK* pGoCounterAttack = new UNIT_DECO_CONDITION_GO_COUNTER_ATTACK("goCounterAttack", pCounterAttackForeverRepeater);
+        UNIT_ACTION_COUNTER_ATTACK* pCounterAttack = new UNIT_ACTION_COUNTER_ATTACK("RetributiveAttack", pGoCounterAttack);
 
     /*
     //Build Missile Turret (BUG)
@@ -257,7 +270,6 @@ void StarterBot::onStart()
 
     //Bwem
     BWEM::Map::Instance().Initialize(BWAPI::BroodwarPtr);
-
 }
 
 // Called on each frame of the game
@@ -324,12 +336,15 @@ void StarterBot::onFrame()
                 // if the unit is of the correct type, and it actually has been constructed, return it
                 if (unit->getType() == BWAPI::UnitTypes::Terran_Barracks && unit->isCompleted()) {
                     numBarracks += 1;
+                    pData->infrastructures.insert(unit);
                 }
                 else if (unit->getType() == BWAPI::UnitTypes::Terran_Factory && unit->isCompleted()) {
                     numFactories += 1;
+                    pData->infrastructures.insert(unit);
                 }
                 else if (unit->getType() == BWAPI::UnitTypes::Terran_Starport && unit->isCompleted()) {
                     numStarPorts += 1;
+                    pData->infrastructures.insert(unit);
                 }
             }
             pData->thresholdSupply = int(BARRACKS_FACTOR * numBarracks + FACTORY_FACTOR * numFactories + STARPORT_FACTOR * numStarPorts);
@@ -356,7 +371,7 @@ void StarterBot::onFrame()
                     }
                 }
 
-                if (unit->getType() == BWAPI::UnitTypes::Terran_Refinery)
+                if (unit->getType() == BWAPI::UnitTypes::Terran_Refinery) //FIXME
                 {
 
                 }
@@ -365,6 +380,26 @@ void StarterBot::onFrame()
             pData->availableGeysers = availableGeysers;
         
     
+        // Update battle situation
+            // if a transition from under attack to not under attack happen in this frame
+            // reset the counter
+            if (!pData->now_underattack && pData->pre_underattack)
+            {
+                pData->not_underattack_counter = 0;
+            }
+            // if keep peace
+            // count how many frames has been peace
+            if (!pData->now_underattack && !pData->pre_underattack)
+            {
+                pData->not_underattack_counter += 1;
+            }
+
+            // update
+            pData->pre_underattack = pData->now_underattack;
+       
+        // Set rally point
+        BWAPI::TilePosition rallyPoint = BWAPI::Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Bunker, pData->tilePositionCommandCenters[pData->tilePositionCommandCenters.size()-1], 20, false);
+        pData->infrastructures.setRallyPoint(BWAPI::Position(rallyPoint));
 }
 /*
 

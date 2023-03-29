@@ -39,6 +39,10 @@ BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
     int maxBuildRange = 128;
     bool buildingOnCreep = supplyProviderType.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(supplyProviderType, desiredPos, maxBuildRange, buildingOnCreep);
+    if (!BWAPI::Broodwar->getUnitsOnTile(buildPos).empty())
+    {
+        return  BT_NODE::FAILURE;
+    }
 
     const bool startedBuilding = builder->build(supplyProviderType, buildPos);
     

@@ -22,6 +22,8 @@
 
 #define RETALIATE_DISTANCE 1024
 
+#define COUNTER_ATTACK_THRESHOLD 120
+
 
 class Data {
 public:
@@ -34,6 +36,16 @@ public:
 	int nWantedFactoryTotal;
 	int nWantedStarportTotal;
 
+	// counter attack
+	// is current in the war time
+	bool at_war;
+	// if under attack in the last frame
+	bool pre_underattack;
+	// if under attack in the current frame
+	bool now_underattack;
+	// count how many frame since not under attack, to decide the counter attack timing
+	int not_underattack_counter;
+
 	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingMinerals;
 	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingGeysers;
 
@@ -44,6 +56,8 @@ public:
 	std::vector<BWAPI::Unit> CommandCenters;
 	std::vector<BWAPI::TilePosition> tilePositionCommandCenters;
 	std::vector<BWAPI::Position> positionCommandCenters;
+
+	BWAPI::Unitset infrastructures;
 
 	// int nWantedWorkersTotal;
 	// int nWantedWorkersFarmingMinerals;

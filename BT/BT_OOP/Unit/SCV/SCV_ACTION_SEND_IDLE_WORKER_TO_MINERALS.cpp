@@ -26,12 +26,13 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
         // Check the unit type, if it is an idle worker, then we want to send it somewhere
         if (unit->getType().isWorker() && unit->isIdle())
         {
-            // Get the closest mineral to this worker unit
-            BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(unit, BWAPI::Broodwar->getMinerals());
 
             // Get the closet command center
             BWAPI::Unit closetCommandCenter = unit->getClosestUnit(BWAPI::Filter::IsResourceDepot);
             BWAPI::TilePosition locationCommandCenter = closetCommandCenter->getTilePosition();
+
+            // Get the closest mineral to this command center
+            BWAPI::Unit closestMineral = Tools::GetClosestUnitTo(closetCommandCenter, BWAPI::Broodwar->getMinerals());
 
             int indexCommandCenter = 0;
             for (int i = 0; i < pData->tilePositionCommandCenters.size(); i++)
