@@ -17,7 +17,7 @@ bool BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY::IsThereNotEnoughSupply(void *data)
     Data* pData = (Data*)data;
     
     // Do nothing if we have NOT ENOUGH MINERALS
-    if (BWAPI::Broodwar->self()->minerals() < 140) //100
+    if (BWAPI::Broodwar->self()->minerals() < 100) //100
     {
         return false;
     }

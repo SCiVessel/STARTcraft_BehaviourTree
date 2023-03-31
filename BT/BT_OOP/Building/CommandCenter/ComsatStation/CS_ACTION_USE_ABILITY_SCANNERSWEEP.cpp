@@ -1,32 +1,76 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "CS_ACTION_USE_ABILITY_SCANNERSWEEP.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+CS_ACTION_USE_ABILITY_SCANNERSWEEP::CS_ACTION_USE_ABILITY_SCANNERSWEEP(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State CS_ACTION_USE_ABILITY_SCANNERSWEEP::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityScannerSweep(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string CS_ACTION_USE_ABILITY_SCANNERSWEEP::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "SCANNING AREA";
 }
 
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State CS_ACTION_USE_ABILITY_SCANNERSWEEP::useAbilityScannerSweep(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    BWAPI::Position beacon;
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+    // For each unit that we own
+    int energyMax = 0;
+    BWAPI::Unit unitToExecute;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        // if the unit is of the correct type, and it actually has been constructed, return it
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Comsat_Station && unit->isCompleted())
+        {
+            if (unit->getEnergy() > energyMax)
+            {
+                energyMax = unit->getEnergy();
+                unitToExecute = unit;
+            }
+        }
+    }
 
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
+    if (energyMax < 50)
+    {
+        return BT_NODE::FAILURE;
+    }
 
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    if (pData->at_war)
+    {
+        for (auto& enemy : BWAPI::Broodwar->enemy()->getUnits())
+        {
+            if (enemy->exists())
+            {
+                if (enemy->isCloaked() || enemy->isBurrowed())
+                {
+                    unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, enemy);
+                    return BT_NODE::SUCCESS;
+                }
+            }
+        }
+    }
+    else if (energyMax >= 200)
+    {
+        for (int m = 0; m < pData->tilesOfExpansions.size(); m++)
+        {
+            for (int n = 0; n < pData->tilesOfExpansions[m].size(); n++)
+            {
+                if (!BWAPI::Broodwar->isExplored(pData->tilesOfExpansions[m][n]))
+                {
+                    unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, BWAPI::Position(pData->tilesOfExpansions[m][n]));
+                    return BT_NODE::SUCCESS;
+                }
+            }
+        }
+    }
+
+    return BT_NODE::FAILURE;
 }

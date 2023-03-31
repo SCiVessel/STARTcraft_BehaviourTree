@@ -6,6 +6,8 @@
 #include "Data.h"
 #include "map.h"
 
+#include <BWEM.h>
+
 class StarterBot
 {
 private:

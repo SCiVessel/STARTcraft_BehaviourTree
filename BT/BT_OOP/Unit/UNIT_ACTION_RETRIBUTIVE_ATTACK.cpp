@@ -35,7 +35,7 @@ BT_NODE::State UNIT_ACTION_RETRIBUTIVE_ATTACK::RetributiveAttack(void* data)
     BWAPI::Unitset enemyUnitsAttacking;
     for (auto& enemy : BWAPI::Broodwar->enemy()->getUnits())
     {
-        if (enemy->exists() && enemy->isAttacking() && enemy->isVisible())
+        if (enemy->exists() && enemy->isAttacking() && enemy->isDetected())
         {
             enemyUnitsAttacking.insert(enemy);
             break;

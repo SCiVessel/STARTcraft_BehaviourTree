@@ -37,6 +37,11 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
             int indexCommandCenter = 0;
             for (int i = 0; i < pData->tilePositionCommandCenters.size(); i++)
             {
+                if (pData->unitsFarmingMinerals[i].contains(unit))
+                {
+                    pData->unitsFarmingMinerals[i].erase(unit);
+                }
+
                 if (pData->tilePositionCommandCenters[i] == locationCommandCenter)
                 {
                     indexCommandCenter = i;

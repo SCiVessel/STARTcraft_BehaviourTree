@@ -50,6 +50,10 @@
 
 
 		//SCV
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_EARLY_GAME_SCOUTING.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_SEND_IDLE_WORKER_TO_SCOUT.h"
+
+
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS.h"
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY.h"
 
@@ -81,6 +85,12 @@
 		//Comand Center
 		#include "BT_OOP/Building/CommandCenter/CC_ACTION_TRAIN_WORKER.h"
 
+		#include"BT_OOP/Building/CommandCenter/CC_DECO_CONDITION_NOT_ENOUGH_COMSATSTATION.h"
+		#include"BT_OOP/Building/CommandCenter/CC_ACTION_BUILD_COMSATSTATION.h"
+
+		#include"BT_OOP/Building/CommandCenter/ComsatStation/CS_ACTION_USE_ABILITY_SCANNERSWEEP.h"
+
+
 		//Barracks
 		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_MARINE.h"
 		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MARINE.h"
@@ -92,6 +102,9 @@
 		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MEDIC.h"
 
 		//Factory
+		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_MACHINESHOP.h"
+		#include "BT_OOP/Building/Factory/FA_ACTION_BUILD_MACHINESHOP.h"
+
 		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_VULTURE.h"
 		#include "BT_OOP/Building/Factory/FA_ACTION_TRAIN_VULTURE.h"
 
@@ -102,6 +115,9 @@
 		#include "BT_OOP/Building/Factory/FA_ACTION_TRAIN_GOLIATH.h"
 
 		//Starport
+		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_CONTROLTOWER.h"
+		#include "BT_OOP/Building/Starport/SP_ACTION_BUILD_CONTROLTOWER.h"
+
 		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_WRAITH.h"
 		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_WRAITH.h"
 

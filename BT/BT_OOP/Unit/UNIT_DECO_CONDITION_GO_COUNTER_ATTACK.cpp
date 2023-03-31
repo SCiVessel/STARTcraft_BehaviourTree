@@ -22,7 +22,7 @@ bool UNIT_DECO_CONDITION_GO_COUNTER_ATTACK::goCounterAttack(void *data)
         // reset recorder
         pData->at_war = false;
         pData->not_underattack_counter = 0;
-
+        
         return true;
     }
 

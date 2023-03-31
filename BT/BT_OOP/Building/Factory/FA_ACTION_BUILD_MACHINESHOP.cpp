@@ -1,32 +1,38 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "FA_ACTION_BUILD_MACHINESHOP.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+FA_ACTION_BUILD_MACHINESHOP::FA_ACTION_BUILD_MACHINESHOP(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State FA_ACTION_BUILD_MACHINESHOP::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(buildMachineShop(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string FA_ACTION_BUILD_MACHINESHOP::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "BUILD MACHINESHOP";
 }
 
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State FA_ACTION_BUILD_MACHINESHOP::buildMachineShop(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    BWAPI::Unitset unitSet = BWAPI::Broodwar->self()->getUnits();
+    for (auto& unit : unitSet)
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Factory)
+        {
+            bool startedBuilding = unit->buildAddon(BWAPI::UnitTypes::Terran_Machine_Shop);
+            if (startedBuilding)
+            {
+                BWAPI::Broodwar->printf("Started Building Machine Shop");
+                return BT_NODE::SUCCESS;
+            }
+        }
+    }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
-
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    return BT_NODE::FAILURE;
 }

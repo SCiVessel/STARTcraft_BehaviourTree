@@ -2,6 +2,8 @@
 #include "Tools.h"
 #include "Data.h"
 
+#include "BWEM.h"
+
 UNIT_ACTION_COUNTER_ATTACK::UNIT_ACTION_COUNTER_ATTACK(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
@@ -31,12 +33,22 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
         }
     }
 
+    bool isCounterAttack = BWAPI::Broodwar->self()->supplyUsed() >= COUNTER_ATTACK_SUPPLY ? true : false;
+
     // F2 & ATTACK
     for (auto& unit : F2)
     {
         if (unit && unit->isIdle())
         {
-            unit->attack(BWAPI::Position(BWAPI::Broodwar->enemy()->getStartLocation()));
+            if (isCounterAttack)
+            {
+                unit->attack(pData->enemySpawnLocation);
+            }
+            else
+            {
+                unit->move(BWAPI::Position(pData->rallyPoint));
+            }
+            
         }
     }
     
