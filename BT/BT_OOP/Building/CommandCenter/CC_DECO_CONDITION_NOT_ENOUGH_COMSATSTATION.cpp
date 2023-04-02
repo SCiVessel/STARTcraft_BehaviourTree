@@ -33,7 +33,7 @@ bool CC_DECO_CONDITION_NOT_ENOUGH_COMSATSTATION::IsThereNotEnoughComsatStation(v
     // Get the amount of ComsatStation
     int existingComsatStation = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Comsat_Station, unitSet);
     // Do nothing if we already have enough ComsatStation
-    if (existingComsatStation >= 3)
+    if (existingComsatStation >= 3 || existingComsatStation >= pData->CommandCenters.size())
     {
         return false;
     }

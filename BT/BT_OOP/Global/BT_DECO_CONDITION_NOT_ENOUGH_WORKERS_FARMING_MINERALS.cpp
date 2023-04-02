@@ -15,6 +15,11 @@ std::string BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS::GetDescriptio
 bool BT_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_MINERALS::IsThereNotEnoughWorkersFarmingMinerals(void *data)
 {
     Data* pData = (Data*)data;
+
+    if (pData->nWantedWorkersFarmingMinerals.empty())
+    {
+        return false;
+    }
     
     for (int i = 0; i < pData->nWantedWorkersFarmingMinerals.size(); i++)
     {

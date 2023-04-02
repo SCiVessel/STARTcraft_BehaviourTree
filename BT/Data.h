@@ -4,17 +4,14 @@
 
 #include <BWEM.h>
 
-// #define THRESHOLD1_MINERALS 200
-#define EARLY_GAME_SUPPLY_THRESHOLD 10
-
 #define EARLY_GAME_SCOUT_TIMING 60
 
 #define NWANTED_WORKERS_TOTAL 30
 #define NWANTED_WORKERS_FARMING_MINERALS 25
 
 //Definig Game Phase
-#define EARLY_GAME 480
-#define MID_GAME 960
+#define EARLY_GAME 720
+#define MID_GAME 1200
 
 #define SUPPLY_PROVIDED_BY_CC 20
 #define SUPPLY_PROVIDED_BY_SD 16
@@ -24,22 +21,34 @@
 #define FACTORY_FACTOR 8
 #define STARPORT_FACTOR 8
 
-#define RETALIATE_DISTANCE 1024
-
-#define COUNTER_ATTACK_THRESHOLD 120
+#define COUNTER_ATTACK_THRESHOLD 128
 #define COUNTER_ATTACK_SUPPLY 120
+
+#define TOTAL_WORKER_LIMIT 160
 
 
 class Data {
 public:
-	int currMinerals;
-	int thresholdMinerals;
-	int currSupply;
-	int thresholdSupply; 
+	unsigned int mapWidth;
+	unsigned int mapHeight;
 
-	int nWantedBarracksTotal;
-	int nWantedFactoryTotal;
-	int nWantedStarportTotal;
+	unsigned int maxAggroDistance;
+
+	unsigned int currMinerals;
+	unsigned int currGas;
+	unsigned int currSupply;
+
+	unsigned int thresholdSupply; 
+
+	unsigned int nWantedBarracksTotal;
+	unsigned int nWantedFactoryTotal;
+	unsigned int nWantedStarportTotal;
+
+	unsigned int nWantedScienceFacilityTotal;
+	unsigned int nWantedEngineeringBayTotal;
+	unsigned int nWantedArmoryTotal;
+
+	unsigned int nWantedCommandCenterForTheMoment;
 
 	// counter attack
 	// is current in the war time
@@ -51,16 +60,20 @@ public:
 	// count how many frame since not under attack, to decide the counter attack timing
 	int not_underattack_counter;
 
+	bool counterAttackFlag = false;
+
 	BWAPI::Unitset scoutUnits;
 
 	BWAPI::Race enemyRace;
 
-	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingMinerals;
-	std::vector<std::unordered_set<BWAPI::Unit>> unitsFarmingGeysers;
+	BWAPI::Unitset builders;
 
-	std::vector<int> nWantedWorkersTotal;
-	std::vector<int> nWantedWorkersFarmingMinerals;
-	std::vector<int> nWantedWorkersFarmingGeysers;
+	std::vector<BWAPI::Unitset> unitsFarmingMinerals;
+	std::vector<BWAPI::Unitset> unitsFarmingGeysers;
+
+	std::vector<unsigned int> nWantedWorkersTotal;
+	std::vector<unsigned int> nWantedWorkersFarmingMinerals;
+	std::vector<unsigned int> nWantedWorkersFarmingGeysers;
 
 	std::vector<BWAPI::Unit> CommandCenters;
 	std::vector<BWAPI::TilePosition> tilePositionCommandCenters;
@@ -69,10 +82,12 @@ public:
 	BWAPI::Unitset infrastructures;
 
 	BWAPI::TilePosition rallyPoint;
+	BWAPI::TilePosition initialRallyPoint;
 
 	BWAPI::Position enemySpawnLocation;
 
 	std::unordered_set<BWAPI::Unit> availableGeysers;
 
-	std::vector<std::vector<BWAPI::TilePosition>> tilesOfExpansions;
+	std::vector<BWAPI::TilePosition> tilesOfExpansions;
+	BWAPI::Unitset blockingMinerals;
 };

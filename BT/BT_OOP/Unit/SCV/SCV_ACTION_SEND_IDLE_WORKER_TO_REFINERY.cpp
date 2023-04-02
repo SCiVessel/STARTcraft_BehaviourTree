@@ -43,10 +43,10 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY::SendIdleWorkerToRefinery
         if (unit->getType().isWorker() && unit->isIdle())
         {
             // Get the closest refinery to this worker unit
-            BWAPI::Unit closestRefinery = unit->getClosestUnit(BWAPI::Filter::IsRefinery);
+            BWAPI::Unit closestRefinery = unit->getClosestUnit(BWAPI::Filter::IsRefinery && BWAPI::Filter::IsOwned);
 
             // Get the closet command center
-            BWAPI::Unit closetCommandCenter = closestRefinery->getClosestUnit(BWAPI::Filter::IsResourceDepot);
+            BWAPI::Unit closetCommandCenter = closestRefinery->getClosestUnit(BWAPI::Filter::IsResourceDepot && BWAPI::Filter::IsOwned);
             BWAPI::TilePosition locationCommandCenter = closetCommandCenter->getTilePosition();
 
             int indexCommandCenter = 0;
@@ -62,20 +62,26 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY::SendIdleWorkerToRefinery
             // If the command center already has sufficient workers, move to another command center
             if (pData->unitsFarmingGeysers[indexCommandCenter].size() >= pData->nWantedWorkersFarmingGeysers[indexCommandCenter])
             {
-                for (int temp = 0; temp < pData->tilePositionCommandCenters.size(); temp++)
+                for (int temp = indexCommandCenter; temp < pData->tilePositionCommandCenters.size(); temp++)
                 {
                     if (pData->unitsFarmingGeysers[temp].size() < pData->nWantedWorkersFarmingGeysers[temp])
                     {
                         unit->rightClick(pData->positionCommandCenters[temp]);
-                        return BT_NODE::SUCCESS;
+                        return BT_NODE::FAILURE;
                     }
                 }
-                return BT_NODE::FAILURE;
             }
 
             // If a valid refinery was found, right click it with the unit in order to start harvesting
             if (closestRefinery)
             {
+                for (auto& check : pData->unitsFarmingGeysers)
+                {
+                    if (check.contains(unit))
+                    {
+                        check.erase(unit);
+                    }
+                }
                 unit->rightClick(closestRefinery);
                 // Insert the worker to the list of the designated base
                 pData->unitsFarmingGeysers[indexCommandCenter].insert(unit);

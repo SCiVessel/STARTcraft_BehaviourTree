@@ -34,7 +34,7 @@ bool FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH::IsThereNotEnoughGoliath(void* data)
             if (eu->isFlying())
                 airEnemies++;
         
-        if (airEnemies / 3 > goliaths)
+        if (airEnemies / 1.5 > goliaths)
             return true;
         else
             return false;

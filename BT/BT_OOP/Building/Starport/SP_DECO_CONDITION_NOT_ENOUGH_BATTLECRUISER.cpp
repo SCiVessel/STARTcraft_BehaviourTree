@@ -17,15 +17,10 @@ bool SP_DECO_CONDITION_NOT_ENOUGH_BATTLECRUISER::IsThereNotEnoughBattlecruiser(v
     Data* pData = (Data*)data;
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
-    if (BWAPI::Broodwar->self()->minerals() < 400 or BWAPI::Broodwar->self()->gas() < 300 or unusedSupply < 12)
+    if (BWAPI::Broodwar->self()->minerals() > 2400 && BWAPI::Broodwar->self()->gas() > 1800 && unusedSupply >= 12)
     {
-        return false;
-    }
-
-    if (BWAPI::Broodwar->self()->minerals() > 2400 and BWAPI::Broodwar->self()->gas() > 1800)
         return true;
-    else
-        return false;
+    }
 
     return false;
 }

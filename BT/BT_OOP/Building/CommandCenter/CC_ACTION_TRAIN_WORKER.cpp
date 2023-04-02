@@ -20,17 +20,28 @@ BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    std::vector<BWAPI::Unit> CommandCenters;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    // For each unit that we own
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        // if the unit is of the correct type, and it actually has been constructed, return it
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Command_Center && unit->isCompleted())
+        {
+            CommandCenters.push_back(unit);
+        }
+    }
+
+    for (auto& unit : CommandCenters)
+    {
+        if (unit && !unit->isTraining())
+        {
+            unit->train(BWAPI::UnitTypes::Terran_SCV);
+            BWAPI::Error error = BWAPI::Broodwar->getLastError();
+            if (error != BWAPI::Errors::None)
+                return BT_NODE::FAILURE;
+            else return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

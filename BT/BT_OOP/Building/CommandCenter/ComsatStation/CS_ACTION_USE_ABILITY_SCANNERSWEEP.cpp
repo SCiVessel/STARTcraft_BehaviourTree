@@ -43,31 +43,34 @@ BT_NODE::State CS_ACTION_USE_ABILITY_SCANNERSWEEP::useAbilityScannerSweep(void* 
         return BT_NODE::FAILURE;
     }
 
-    if (pData->at_war)
+    auto& nukeDots = BWAPI::Broodwar->getNukeDots();
+
+    if (pData->at_war || (!nukeDots.empty()))
     {
         for (auto& enemy : BWAPI::Broodwar->enemy()->getUnits())
         {
             if (enemy->exists())
             {
-                if (enemy->isCloaked() || enemy->isBurrowed())
+                if (enemy->isCloaked() || (enemy->isBurrowed()))
                 {
-                    unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, enemy);
-                    return BT_NODE::SUCCESS;
+                    if (enemy->getClosestUnit(BWAPI::Filter::IsOwned, 256))
+                    {
+                        unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, enemy);
+                        return BT_NODE::SUCCESS;
+                    }
                 }
             }
         }
     }
-    else if (energyMax >= 200)
+    
+    if (energyMax >= 200)
     {
         for (int m = 0; m < pData->tilesOfExpansions.size(); m++)
         {
-            for (int n = 0; n < pData->tilesOfExpansions[m].size(); n++)
+            if (!BWAPI::Broodwar->isExplored(pData->tilesOfExpansions[pData->tilesOfExpansions.size() - 1 - m]))
             {
-                if (!BWAPI::Broodwar->isExplored(pData->tilesOfExpansions[m][n]))
-                {
-                    unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, BWAPI::Position(pData->tilesOfExpansions[m][n]));
-                    return BT_NODE::SUCCESS;
-                }
+                unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, BWAPI::Position(pData->tilesOfExpansions[pData->tilesOfExpansions.size() - 1 - m]));
+                return BT_NODE::SUCCESS;
             }
         }
     }

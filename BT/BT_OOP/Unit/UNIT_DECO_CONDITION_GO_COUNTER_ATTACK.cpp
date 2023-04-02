@@ -15,6 +15,11 @@ std::string UNIT_DECO_CONDITION_GO_COUNTER_ATTACK::GetDescription()
 bool UNIT_DECO_CONDITION_GO_COUNTER_ATTACK::goCounterAttack(void *data)
 {
     Data* pData = (Data*)data;
+
+    if (!BWAPI::Broodwar->getNukeDots().empty())
+    {
+        return true;
+    }
     
     // check if at war status cease
     if (pData->at_war && !pData->now_underattack && pData->not_underattack_counter >= COUNTER_ATTACK_THRESHOLD)
@@ -25,6 +30,6 @@ bool UNIT_DECO_CONDITION_GO_COUNTER_ATTACK::goCounterAttack(void *data)
         
         return true;
     }
-
+    
     return false;
 }

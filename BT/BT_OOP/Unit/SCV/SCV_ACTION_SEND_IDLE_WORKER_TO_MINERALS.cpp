@@ -28,7 +28,7 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
         {
 
             // Get the closet command center
-            BWAPI::Unit closetCommandCenter = unit->getClosestUnit(BWAPI::Filter::IsResourceDepot);
+            BWAPI::Unit closetCommandCenter = unit->getClosestUnit(BWAPI::Filter::IsOwned && BWAPI::Filter::IsResourceDepot);
             BWAPI::TilePosition locationCommandCenter = closetCommandCenter->getTilePosition();
 
             // Get the closest mineral to this command center
@@ -52,21 +52,35 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
             // If the command center already has sufficient workers, move to another command center
             if (pData->unitsFarmingMinerals[indexCommandCenter].size() >= pData->nWantedWorkersFarmingMinerals[indexCommandCenter])
             {
-                for (int temp = 0; temp < pData->tilePositionCommandCenters.size(); temp++)
+                for (int temp = indexCommandCenter; temp < pData->tilePositionCommandCenters.size(); temp++)
                 {
                     if (pData->unitsFarmingMinerals[temp].size() < pData->nWantedWorkersFarmingMinerals[temp])
                     {
                         unit->rightClick(pData->positionCommandCenters[temp]);
-                        return BT_NODE::SUCCESS;
+                        return BT_NODE::FAILURE;
                     }
                 }
-                return BT_NODE::FAILURE;
             }
 
             // If a valid mineral was found, right click it with the unit in order to start harvesting
             if (closestMineral) {
+                for (auto& check : pData->unitsFarmingMinerals)
+                {
+                    if (check.contains(unit))
+                    {
+                        check.erase(unit);
+                    }
+                }
                 unit->rightClick(closestMineral);
                 // Insert the worker to the list of the designated base
+                if (!pData->blockingMinerals.empty())
+                {
+                    if (pData->blockingMinerals.contains(closestMineral))
+                    {
+                        return BT_NODE::SUCCESS;
+                    }
+                }
+
                 pData->unitsFarmingMinerals[indexCommandCenter].insert(unit);
                 return BT_NODE::SUCCESS;
             }

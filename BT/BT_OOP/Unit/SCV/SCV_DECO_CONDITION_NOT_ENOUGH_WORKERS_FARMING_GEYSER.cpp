@@ -16,6 +16,11 @@ bool SCV_DECO_CONDITION_NOT_ENOUGH_WORKERS_FARMING_GEYSER::IsThereNotEnoughWorke
 {
     Data* pData = (Data*)data;
 
+    if (pData->nWantedWorkersFarmingGeysers.empty())
+    {
+        return false;
+    }
+
     BWAPI::Unitset temp;
     for (int i = 0; i < pData->nWantedWorkersFarmingGeysers.size(); i++)
     {

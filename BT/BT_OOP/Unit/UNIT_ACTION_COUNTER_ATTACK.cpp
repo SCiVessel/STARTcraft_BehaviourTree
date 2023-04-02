@@ -23,13 +23,19 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
     Data* pData = (Data*)data;
 
     // F2
-    std::vector<BWAPI::Unit> F2;
+    BWAPI::Unitset F2;
+    BWAPI::Unitset Casters;
+
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {
         // if the unit can be selected with F2
-        if (unit->canAttack() && unit->getType() != BWAPI::UnitTypes::Terran_SCV)
+        if ((unit->getType() == BWAPI::UnitTypes::Terran_Science_Vessel) || (unit->getType() == BWAPI::UnitTypes::Terran_Medic))
         {
-            F2.push_back(unit);
+            Casters.insert(unit);
+        }
+        else if (unit->canAttack() && (unit->getType() != BWAPI::UnitTypes::Terran_SCV))
+        {
+            F2.insert(unit);
         }
     }
 
@@ -38,7 +44,7 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
     // F2 & ATTACK
     for (auto& unit : F2)
     {
-        if (unit && unit->isIdle())
+        if ((!unit->isAttacking()) || (unit->getTarget() == nullptr) || (unit->isIdle()))
         {
             if (isCounterAttack)
             {
@@ -46,12 +52,35 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
             }
             else
             {
-                unit->move(BWAPI::Position(pData->rallyPoint));
-            }
-            
+                unit->attack(BWAPI::Position(pData->rallyPoint));
+            }   
         }
     }
-    
+
+    for (auto& caster : Casters)
+    {
+        if (caster->getType() == BWAPI::UnitTypes::Terran_Medic)
+        {
+            BWAPI::Unitset bioUnits = caster->getUnitsInRadius(128, BWAPI::Filter::IsOwned && BWAPI::Filter::IsOrganic);
+            for (auto& wounded : bioUnits)
+            {
+                if (wounded->getInitialHitPoints() > wounded->getHitPoints())
+                {
+                    caster->useTech(BWAPI::TechTypes::Healing, wounded);
+                    break;
+                }
+            }
+        }
+
+        if ((caster->getTarget() == nullptr) || (caster->isIdle()))
+        {
+            BWAPI::Unit followMe = Tools::GetClosestUnitTo(caster, F2);
+            if (followMe != nullptr)
+            {
+                caster->follow(followMe);
+            }
+        }
+    }
     /*BWAPI::Error error = BWAPI::Broodwar->getLastError();
     if (error != BWAPI::Errors::None)
         return BT_NODE::FAILURE;

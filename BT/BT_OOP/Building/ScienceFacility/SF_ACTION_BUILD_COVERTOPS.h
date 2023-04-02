@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class SCV_ACTION_BUILD_ARMORY: public BT_ACTION {
+class SF_ACTION_BUILD_COVERTOPS : public BT_ACTION {
 public:
-    SCV_ACTION_BUILD_ARMORY(std::string name, BT_NODE* parent);
+    SF_ACTION_BUILD_COVERTOPS(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State BuildArmory(void* data);
+    static BT_NODE::State buildCovertOps(void* data);
 };
 //----------

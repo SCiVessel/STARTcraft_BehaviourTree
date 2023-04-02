@@ -72,9 +72,18 @@
 
 		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_STARPORT.h"
 		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_STARPORT.h"
+
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_SCIENCEFACILITY.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_SCIENCEFACILITY.h"
 		
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_ENGINEERINGBAY.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_ENGINEERINGBAY.h"
 
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_ARMORY.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_ARMORY.h"
 
+		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER.h"
+		#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_COMMANDCENTER.h"
 		
 		//#include "BT_OOP/Unit/SCV/SCV_ACTION_BUILD_MISSILE_TURRET.h"
 
@@ -100,6 +109,9 @@
 
 		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_MEDIC.h"
 		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_MEDIC.h"
+
+		#include "BT_OOP/Building/Barracks/BA_DECO_CONDITION_NOT_ENOUGH_GHOST.h"
+		#include "BT_OOP/Building/Barracks/BA_ACTION_TRAIN_GHOST.h"
 
 		//Factory
 		#include "BT_OOP/Building/Factory/FA_DECO_CONDITION_NOT_ENOUGH_MACHINESHOP.h"
@@ -132,6 +144,13 @@
 
 		#include "BT_OOP/Building/Starport/SP_DECO_CONDITION_NOT_ENOUGH_BATTLECRUISER.h"
 		#include "BT_OOP/Building/Starport/SP_ACTION_TRAIN_BATTLECRUISER.h"
+
+		//Science Facility
+		#include "BT_OOP/Building/ScienceFacility/SF_DECO_CONDITION_NOT_ENOUGH_COVERTOPS.h"
+		#include "BT_OOP/Building/ScienceFacility/SF_ACTION_BUILD_COVERTOPS.h"
+
+		#include "BT_OOP/Building/ScienceFacility/SF_DECO_CONDITION_NOT_ENOUGH_PHYSICSLAB.h"
+		#include "BT_OOP/Building/ScienceFacility/SF_ACTION_BUILD_PHYSICSLAB.h"
 		
 	//Global
 		#include "BT_OOP/Global/GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK.h"

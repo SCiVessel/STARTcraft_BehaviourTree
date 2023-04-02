@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class SCV_ACTION_BUILD_COMMAND_CENTER : public BT_ACTION {
+class SF_ACTION_BUILD_PHYSICSLAB : public BT_ACTION {
 public:
-    SCV_ACTION_BUILD_COMMAND_CENTER(std::string name, BT_NODE* parent);
+    SF_ACTION_BUILD_PHYSICSLAB(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State BuildCommandcenter(void* data);
+    static BT_NODE::State buildPhysicsLab(void* data);
 };
 //----------
