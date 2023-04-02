@@ -60,17 +60,6 @@ StarterBot::StarterBot()
             pData->tilePositionCommandCenters.push_back(unit->getTilePosition());
             pData->positionCommandCenters.push_back(unit->getPosition());
 
-            /*    BWAPI::Unitset temp = unit->getUnitsInRadius(128, BWAPI::Filter::IsResourceContainer);    //FIXME
-                if (!temp.empty())
-                {
-                    for (auto& resource : temp) {
-                        if (resource->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser)
-                        {
-                            pData->availableGeysers.insert(resource);
-                        }
-                    }
-                }
-            */
             break;
         }
     }
@@ -114,7 +103,7 @@ StarterBot::StarterBot()
     pBT = new BT_DECORATOR("EntryPoint", nullptr);
 
     //Main Parrallel Sequence
-    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 25);
+    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 30);
 
         //--------------------------------------------------------------Global--------------------------------------------------------------//
         //For all Units:
@@ -124,7 +113,7 @@ StarterBot::StarterBot()
 
             BT_PARALLEL_SELECTOR* pRetributiveAttackAndWait = new BT_PARALLEL_SELECTOR("RetributiveAttackAndWait", pIsUnderAttack, 2); //FIXME
 
-            BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 1);
+            BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
             UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
 
         //Counter-Attack
@@ -254,6 +243,14 @@ StarterBot::StarterBot()
             SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS* pSendWorkerToMinerals = new SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS("SendWorkerToMinerals", pNotEnoughWorkersFarmingMinerals);
 
         // Constructing Sequence
+        
+            //Build Unfinished Building
+            BT_DECO_REPEATER* pBuildUnfinishedBuildingForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildUnfinishedBuilding", pParallelSeq, 0, true, false, true);
+            BT_SEQUENCER* pBuildUnfinishedBuildingAndWait = new BT_SEQUENCER("BuildUnfinishedBuildingAndWait", pBuildUnfinishedBuildingForeverRepeater, 2);
+
+                BT_ACTION_WAIT* pUnfinishedBuildingWait = new BT_ACTION_WAIT("WaitForResponse", pBuildUnfinishedBuildingAndWait, 3);
+                SCV_ACTION_BUILD_UNFINISHED_BUILDING* pBuildUnfinishedBuilding = new SCV_ACTION_BUILD_UNFINISHED_BUILDING("BuildUnfinishedBuilding", pBuildUnfinishedBuildingAndWait);
+
             //Build Supply Provider
             BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, true);
             BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY* pNotEnoughSupply = new BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY("NotEnoughSupply", pBuildSupplyProviderForeverRepeater);
@@ -472,13 +469,13 @@ void StarterBot::onFrame()
             pData->nWantedFactoryTotal = 1;
             pData->nWantedStarportTotal = 1;
 
-            pData->nWantedScienceFacilityTotal = 1;
+            pData->nWantedScienceFacilityTotal = 0;
             pData->nWantedEngineeringBayTotal = 1;
-            pData->nWantedArmoryTotal = 1;
+            pData->nWantedArmoryTotal = 0;
 
             pData->nWantedCommandCenterForTheMoment = 3;
 
-            pData->thresholdSupply = 14;
+            pData->thresholdSupply = 16;
         }
         else
         {
@@ -490,7 +487,7 @@ void StarterBot::onFrame()
             pData->nWantedEngineeringBayTotal = 2;
             pData->nWantedArmoryTotal = 2;
 
-            pData->thresholdSupply = 20;
+            pData->thresholdSupply = 24;
 
             pData->nWantedCommandCenterForTheMoment = 6;
         }
@@ -558,15 +555,15 @@ void StarterBot::onFrame()
             // update
             pData->pre_underattack = pData->now_underattack;
        
-        // If a unit get stuck
-       /* for (auto& unit : unitSet)
+        //If a unit get stuck
+        pData->stuckUnits.clear();
+        for (auto& unit : unitSet)
         {
             if (unit->isStuck())
             {
-
+                pData->stuckUnits.insert(unit);
             }
-        } copy&paste"at_war"
-        *///FIXME
+        }
 }
 
 // Draw some relevent information to the screen to help us debug the bot
@@ -619,6 +616,9 @@ void StarterBot::onUnitDestroy(BWAPI::Unit unit)
                 pData->positionCommandCenters.erase(pData->positionCommandCenters.begin() + idx);
                 pData->unitsFarmingMinerals.erase(pData->unitsFarmingMinerals.begin() + idx);
                 pData->unitsFarmingGeysers.erase(pData->unitsFarmingGeysers.begin() + idx);
+
+                pData->rallyPoint = BWAPI::Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Bunker, BWAPI::Broodwar->self()->getStartLocation(), 64, false);
+                break;
             }
         }
     }
@@ -683,15 +683,6 @@ void StarterBot::onUnitComplete(BWAPI::Unit unit)
     {
         pData->rallyPoint = BWAPI::Broodwar->getBuildLocation(BWAPI::UnitTypes::Terran_Bunker, unit->getTilePosition(), 64, false);
         pData->infrastructures.setRallyPoint(BWAPI::Position(pData->rallyPoint));
-
-        for (auto temp : BWAPI::Broodwar->self()->getUnits())
-        {
-            if (temp->getType() =! BWAPI::UnitTypes::Terran_SCV)
-            {
-
-                temp->attack(BWAPI::Position(pData->rallyPoint));
-            }
-        }
 
     }
     else if (unit->getPlayer() == BWAPI::Broodwar->self() && (unit->getType() == BWAPI::UnitTypes::Terran_Barracks || BWAPI::UnitTypes::Terran_Factory || BWAPI::UnitTypes::Terran_Starport))

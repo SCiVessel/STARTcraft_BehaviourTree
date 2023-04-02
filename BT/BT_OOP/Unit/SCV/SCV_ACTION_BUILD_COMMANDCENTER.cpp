@@ -32,7 +32,7 @@ BT_NODE::State SCV_ACTION_BUILD_COMMANDCENTER::BuildCommandCenter(void* data)
     for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
     {
         auto it = pData->unitsFarmingMinerals[i].begin();
-        if (it != pData->unitsFarmingMinerals[i].end())
+        if ((it != pData->unitsFarmingMinerals[i].end()) && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
         {
             builder = *it;
             index = i;
@@ -73,7 +73,8 @@ BT_NODE::State SCV_ACTION_BUILD_COMMANDCENTER::BuildCommandCenter(void* data)
             {
                 return BT_NODE::FAILURE;
             }
-            else if (unit->getOrder() == BWAPI::UnitCommandTypes::Build)
+            
+            if (unit->getOrder() == BWAPI::UnitCommandTypes::Build)
             {
                 if (unit->getBuildUnit()->getTilePosition() == buildPos)
                 {

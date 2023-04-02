@@ -15,6 +15,14 @@ std::string SP_DECO_CONDITION_NOT_ENOUGH_VALKYRIE::GetDescription()
 bool SP_DECO_CONDITION_NOT_ENOUGH_VALKYRIE::IsThereNotEnoughValkyrie(void* data)
 {
     Data* pData = (Data*)data;
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Controltowers = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Control_Tower, units);
+    int Armories = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Armory, units);
+    if (Controltowers < 1 || Armories < 1)
+    {
+        return false;
+    }
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 250 or BWAPI::Broodwar->self()->gas() < 125 or unusedSupply < 6)
@@ -22,7 +30,6 @@ bool SP_DECO_CONDITION_NOT_ENOUGH_VALKYRIE::IsThereNotEnoughValkyrie(void* data)
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int valkyries = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Valkyrie, units);
     if (valkyries > 3)
         return false;

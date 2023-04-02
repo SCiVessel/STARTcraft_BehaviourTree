@@ -15,6 +15,13 @@ std::string BA_DECO_CONDITION_NOT_ENOUGH_GHOST::GetDescription()
 bool BA_DECO_CONDITION_NOT_ENOUGH_GHOST::IsThereNotEnoughGhost(void* data)
 {
     Data* pData = (Data*)data;
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Covertops = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Covert_Ops, units);
+    if (Covertops < 1)
+    {
+        return false;
+    }
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 25 or BWAPI::Broodwar->self()->gas() < 75 or unusedSupply < 2)
@@ -31,7 +38,6 @@ bool BA_DECO_CONDITION_NOT_ENOUGH_GHOST::IsThereNotEnoughGhost(void* data)
             break;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int ghosts = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Ghost, units);
 
     if (enemyRace == 0) // Zerg

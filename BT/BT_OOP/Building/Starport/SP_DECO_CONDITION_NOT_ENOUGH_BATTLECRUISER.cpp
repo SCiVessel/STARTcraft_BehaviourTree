@@ -16,6 +16,14 @@ bool SP_DECO_CONDITION_NOT_ENOUGH_BATTLECRUISER::IsThereNotEnoughBattlecruiser(v
 {
     Data* pData = (Data*)data;
 
+    auto units = BWAPI::Broodwar->self()->getUnits();
+    int Controltowers = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Control_Tower, units);
+    int Physicslabs = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Physics_Lab, units);
+    if (Controltowers < 1 || Physicslabs < 1)
+    {
+        return false;
+    }
+
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() > 2400 && BWAPI::Broodwar->self()->gas() > 1800 && unusedSupply >= 12)
     {

@@ -31,7 +31,7 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
         // if the unit can be selected with F2
         if ((unit->getType() == BWAPI::UnitTypes::Terran_Science_Vessel) || (unit->getType() == BWAPI::UnitTypes::Terran_Medic))
         {
-            Casters.insert(unit);
+            F2.insert(unit);
         }
         else if (unit->canAttack() && (unit->getType() != BWAPI::UnitTypes::Terran_SCV))
         {
@@ -57,30 +57,6 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
         }
     }
 
-    for (auto& caster : Casters)
-    {
-        if (caster->getType() == BWAPI::UnitTypes::Terran_Medic)
-        {
-            BWAPI::Unitset bioUnits = caster->getUnitsInRadius(128, BWAPI::Filter::IsOwned && BWAPI::Filter::IsOrganic);
-            for (auto& wounded : bioUnits)
-            {
-                if (wounded->getInitialHitPoints() > wounded->getHitPoints())
-                {
-                    caster->useTech(BWAPI::TechTypes::Healing, wounded);
-                    break;
-                }
-            }
-        }
-
-        if ((caster->getTarget() == nullptr) || (caster->isIdle()))
-        {
-            BWAPI::Unit followMe = Tools::GetClosestUnitTo(caster, F2);
-            if (followMe != nullptr)
-            {
-                caster->follow(followMe);
-            }
-        }
-    }
     /*BWAPI::Error error = BWAPI::Broodwar->getLastError();
     if (error != BWAPI::Errors::None)
         return BT_NODE::FAILURE;

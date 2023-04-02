@@ -15,6 +15,13 @@ std::string SP_DECO_CONDITION_NOT_ENOUGH_DROPSHIP::GetDescription()
 bool SP_DECO_CONDITION_NOT_ENOUGH_DROPSHIP::IsThereNotEnoughDropship(void *data)
 {
     Data* pData = (Data*)data;
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Controltowers = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Control_Tower, units);
+    if (Controltowers < 1)
+    {
+        return false;
+    }
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 100 or BWAPI::Broodwar->self()->gas() < 100 or unusedSupply < 4)
@@ -22,7 +29,6 @@ bool SP_DECO_CONDITION_NOT_ENOUGH_DROPSHIP::IsThereNotEnoughDropship(void *data)
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     bool isStuck = false;
     for (auto u : units)
     {

@@ -28,12 +28,26 @@ BT_NODE::State SCV_ACTION_BUILD_STARPORT::BuildStarport(void* data)
 
     // Get a unit that we own that is of the given type so it can build
     // If we can't find a valid builder unit, then we have to cancel the building
-    auto it = pData->unitsFarmingMinerals[0].begin();
-    if (it == pData->unitsFarmingMinerals[0].end())
+    BWAPI::Unit builder;
+    unsigned int index;
+
+    bool flag = false;
+    for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
+    {
+        auto it = pData->unitsFarmingMinerals[i].begin();
+        if (it != pData->unitsFarmingMinerals[i].end() && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
+        {
+            builder = *it;
+            index = i;
+            flag = true;
+            break;
+        }
+    }
+
+    if (flag == false)
     {
         return BT_NODE::FAILURE;
     }
-    BWAPI::Unit builder = *it;
     
     // Get a location that we want to build the building next to
     BWAPI::TilePosition desiredPos = BWAPI::Broodwar->self()->getStartLocation();
@@ -42,16 +56,37 @@ BT_NODE::State SCV_ACTION_BUILD_STARPORT::BuildStarport(void* data)
     int maxBuildRange = 128;
     bool buildingOnCreep = BuildStarport.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(BuildStarport, desiredPos, maxBuildRange, buildingOnCreep);
-    if (!BWAPI::Broodwar->getUnitsOnTile(buildPos).empty())
+
+    BWAPI::Unitset myUnits = BWAPI::Broodwar->self()->getUnits();
+    for (auto unit : myUnits)
     {
-        return  BT_NODE::FAILURE;
+        if (unit->getType() == BWAPI::UnitTypes::Terran_SCV)
+        {
+            if (unit->getOrderTargetPosition() == BWAPI::Position(buildPos))
+            {
+                return BT_NODE::FAILURE;
+            }
+            
+            if (unit->getOrder() == BWAPI::UnitCommandTypes::Build)
+            {
+                if (unit->getBuildUnit()->getTilePosition() == buildPos)
+                {
+                    return BT_NODE::FAILURE;
+                }
+            }
+        }
+    }
+
+    if (!BWAPI::Broodwar->canBuildHere(buildPos, BuildStarport))
+    {
+        return BT_NODE::FAILURE;
     }
 
     const bool startedBuilding = builder->build(BuildStarport, buildPos);
 
 
     // Remove from the list only after the building process starts
-    pData->unitsFarmingMinerals[0].erase(it);
+    pData->unitsFarmingMinerals[0].erase(builder);
 
     if (startedBuilding)
         BWAPI::Broodwar->printf("Started Building Starport");

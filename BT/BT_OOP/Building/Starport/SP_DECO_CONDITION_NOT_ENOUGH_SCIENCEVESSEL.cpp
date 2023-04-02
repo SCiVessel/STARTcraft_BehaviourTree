@@ -15,6 +15,14 @@ std::string SP_DECO_CONDITION_NOT_ENOUGH_SCIENCEVESSEL::GetDescription()
 bool SP_DECO_CONDITION_NOT_ENOUGH_SCIENCEVESSEL::IsThereNotEnoughSciencevessel(void* data)
 {
     Data* pData = (Data*)data;
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Controltowers = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Control_Tower, units);
+    int Sciencefacilities = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Science_Facility, units);
+    if (Controltowers < 1 || Sciencefacilities < 1)
+    {
+        return false;
+    }
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 100 or BWAPI::Broodwar->self()->gas() < 225 or unusedSupply < 4)
@@ -22,7 +30,6 @@ bool SP_DECO_CONDITION_NOT_ENOUGH_SCIENCEVESSEL::IsThereNotEnoughSciencevessel(v
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int timePeriod = BWAPI::Broodwar->elapsedTime();
     int scienceVessels = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Science_Vessel, units);
     if (timePeriod <= EARLY_GAME and scienceVessels < 1)

@@ -45,17 +45,56 @@ BT_NODE::State SCV_ACTION_BUILD_REFINERY::BuildRefinery(void* data)
 
     // Get a unit that we own that is of the given type so it can build
     // If we can't find a valid builder unit, then we have to cancel the building
-    auto it = pData->unitsFarmingMinerals[indexCommandCenter].begin();
-    if (it == pData->unitsFarmingMinerals[indexCommandCenter].end())
+    BWAPI::Unit builder;
+    unsigned int index;
+
+    bool flag = false;
+    for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
+    {
+        auto it = pData->unitsFarmingMinerals[i].begin();
+        if (it != pData->unitsFarmingMinerals[i].end() && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
+        {
+            builder = *it;
+            index = i;
+            flag = true;
+            break;
+        }
+    }
+
+    if (flag == false)
     {
         return BT_NODE::FAILURE;
     }
-    BWAPI::Unit builder = *it;
+
+    BWAPI::Unitset myUnits = BWAPI::Broodwar->self()->getUnits();
+    for (auto unit : myUnits)
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_SCV)
+        {
+            if (unit->getOrderTargetPosition() == BWAPI::Position(desiredPos))
+            {
+                return BT_NODE::FAILURE;
+            }
+            
+            if (unit->getOrder() == BWAPI::UnitCommandTypes::Build)
+            {
+                if (unit->getBuildUnit()->getTilePosition() == desiredPos)
+                {
+                    return BT_NODE::FAILURE;
+                }
+            }
+        }
+    }
+
+    if (!BWAPI::Broodwar->canBuildHere(desiredPos, BuildRefinery))
+    {
+        return BT_NODE::FAILURE;
+    }
+
     const bool startedBuilding = builder->build(BuildRefinery, desiredPos);
 
-
     // Remove from the list only after the building process starts
-    pData->unitsFarmingMinerals[indexCommandCenter].erase(it);
+    pData->unitsFarmingMinerals[indexCommandCenter].erase(builder);
     pData->unitsFarmingGeysers[indexCommandCenter].insert(builder);
 
     if (startedBuilding)

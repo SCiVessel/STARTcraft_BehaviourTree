@@ -15,6 +15,13 @@ std::string FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH::GetDescription()
 bool FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH::IsThereNotEnoughGoliath(void* data)
 {
     Data* pData = (Data*)data;
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Armories = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Armory, units);
+    if (Armories < 1)
+    {
+        return false;
+    }
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
     if (BWAPI::Broodwar->self()->minerals() < 100 or BWAPI::Broodwar->self()->gas() < 50 or unusedSupply < 4)
@@ -22,7 +29,6 @@ bool FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH::IsThereNotEnoughGoliath(void* data)
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int goliaths = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Goliath, units);
     if (goliaths < 4)
         return true;
@@ -34,7 +40,7 @@ bool FA_DECO_CONDITION_NOT_ENOUGH_GOLIATH::IsThereNotEnoughGoliath(void* data)
             if (eu->isFlying())
                 airEnemies++;
         
-        if (airEnemies / 1.5 > goliaths)
+        if (airEnemies / 3 > goliaths)
             return true;
         else
             return false;

@@ -32,7 +32,7 @@ BT_NODE::State SCV_ACTION_BUILD_ACADEMY::BuildAcademy(void* data)
     for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
     {
         auto it = pData->unitsFarmingMinerals[i].begin();
-        if (it != pData->unitsFarmingMinerals[i].end())
+        if (it != pData->unitsFarmingMinerals[i].end() && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
         {
             builder = *it;
             index = i;
@@ -53,13 +53,33 @@ BT_NODE::State SCV_ACTION_BUILD_ACADEMY::BuildAcademy(void* data)
     int maxBuildRange = 128;
     bool buildingOnCreep = BuildAcademy.requiresCreep();
     BWAPI::TilePosition buildPos = BWAPI::Broodwar->getBuildLocation(BuildAcademy, desiredPos, maxBuildRange, buildingOnCreep);
-    if (!BWAPI::Broodwar->getUnitsOnTile(buildPos).empty())
+
+    BWAPI::Unitset myUnits = BWAPI::Broodwar->self()->getUnits();
+    for (auto unit : myUnits)
     {
-        return  BT_NODE::FAILURE;
+        if (unit->getType() == BWAPI::UnitTypes::Terran_SCV)
+        {
+            if (unit->getOrderTargetPosition() == BWAPI::Position(buildPos))
+            {
+                return BT_NODE::FAILURE;
+            }
+            
+            if (unit->getOrder() == BWAPI::UnitCommandTypes::Build)
+            {
+                if (unit->getBuildUnit()->getTilePosition() == buildPos)
+                {
+                    return BT_NODE::FAILURE;
+                }
+            }
+        }
+    }
+
+    if (!BWAPI::Broodwar->canBuildHere(buildPos, BuildAcademy))
+    {
+        return BT_NODE::FAILURE;
     }
 
     const bool startedBuilding = builder->build(BuildAcademy, buildPos);
-
 
     // Remove from the list only after the building process starts
     pData->unitsFarmingMinerals[index].erase(builder);

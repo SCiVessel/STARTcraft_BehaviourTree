@@ -17,12 +17,18 @@ bool FA_DECO_CONDITION_NOT_ENOUGH_SIEGETANK::IsThereNotEnoughSiegetank(void *dat
     Data* pData = (Data*)data;
 
     int unusedSupply = Tools::GetTotalSupply(true) - BWAPI::Broodwar->self()->supplyUsed();
+    auto units = BWAPI::Broodwar->self()->getUnits();
+
+    int Machineshop = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Machine_Shop, units);
+    if (Machineshop < 1)
+    {
+        return false;
+    }
     if (BWAPI::Broodwar->self()->minerals() < 150 or BWAPI::Broodwar->self()->gas() < 100 or unusedSupply < 4)
     {
         return false;
     }
 
-    auto units = BWAPI::Broodwar->self()->getUnits();
     int siegetanks = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode, units) + Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, units);
     int marines = Tools::CountUnitsOfType(BWAPI::UnitTypes::Terran_Marine, units);
 

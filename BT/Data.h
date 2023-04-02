@@ -90,4 +90,6 @@ public:
 
 	std::vector<BWAPI::TilePosition> tilesOfExpansions;
 	BWAPI::Unitset blockingMinerals;
+
+	BWAPI::Unitset stuckUnits;
 };
