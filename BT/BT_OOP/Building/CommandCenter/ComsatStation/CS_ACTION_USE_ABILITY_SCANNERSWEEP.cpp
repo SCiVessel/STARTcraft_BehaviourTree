@@ -2,6 +2,7 @@
 #include "Tools.h"
 #include "Data.h"
 
+
 CS_ACTION_USE_ABILITY_SCANNERSWEEP::CS_ACTION_USE_ABILITY_SCANNERSWEEP(std::string name, BT_NODE* parent)
     : BT_ACTION(name, parent) {}
 
@@ -19,8 +20,6 @@ std::string CS_ACTION_USE_ABILITY_SCANNERSWEEP::GetDescription()
 BT_NODE::State CS_ACTION_USE_ABILITY_SCANNERSWEEP::useAbilityScannerSweep(void* data)
 {
     Data* pData = (Data*)data;
-
-    BWAPI::Position beacon;
 
     // For each unit that we own
     int energyMax = 0;
@@ -63,6 +62,20 @@ BT_NODE::State CS_ACTION_USE_ABILITY_SCANNERSWEEP::useAbilityScannerSweep(void* 
         }
     }
     
+    if (pData->enemyMainDestroyed)
+    {
+        for (size_t i = pData->sweepBaseLocation; i < pData->tilesOfExpansions.size(); i++)
+        {
+            if (BWAPI::Broodwar->isVisible(pData->tilesOfExpansions[pData->sweepBaseLocation]) == false)
+            {
+                unitToExecute->useTech(BWAPI::TechTypes::Scanner_Sweep, BWAPI::Position(pData->tilesOfExpansions[pData->sweepBaseLocation]));
+                pData->sweepBaseLocation = i + 1;
+                return BT_NODE::SUCCESS;
+            }
+        }
+        pData->sweepBaseLocation = 0;
+    }
+
     if (energyMax >= 200)
     {
         for (int m = 0; m < pData->tilesOfExpansions.size(); m++)

@@ -1,32 +1,21 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "GH_ACTION_USE_ABILITY_NUKE.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+GH_ACTION_USE_ABILITY_NUKE::GH_ACTION_USE_ABILITY_NUKE(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State GH_ACTION_USE_ABILITY_NUKE::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityNuke(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string GH_ACTION_USE_ABILITY_NUKE::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY NUKE";
 }
 
-
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State GH_ACTION_USE_ABILITY_NUKE::useAbilityNuke(void* data)
 {
-    Data* pData = (Data*)data;
-
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
-
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    return BT_NODE::FAILURE;
 }

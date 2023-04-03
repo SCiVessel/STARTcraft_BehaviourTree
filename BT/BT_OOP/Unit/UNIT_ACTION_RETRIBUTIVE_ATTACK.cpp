@@ -44,6 +44,23 @@ BT_NODE::State UNIT_ACTION_RETRIBUTIVE_ATTACK::RetributiveAttack(void* data)
             if (unit->getType() == BWAPI::UnitTypes::Terran_SCV)
             {
                 F2.insert(unit);
+                for (auto& check : pData->unitsFarmingMinerals)
+                {
+                    if (check.contains(unit))
+                    {
+                        check.erase(unit);
+                        break;
+                    }
+                }
+                for (auto& check : pData->unitsFarmingGeysers)
+                {
+                    if (check.contains(unit))
+                    {
+                        check.erase(unit);
+                        break;
+                    }
+                }
+
                 if (F2.size() >= 8)
                 {
                     break;

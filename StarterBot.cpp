@@ -103,23 +103,25 @@ StarterBot::StarterBot()
     pBT = new BT_DECORATOR("EntryPoint", nullptr);
 
     //Main Parrallel Sequence
-    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 30);
+    BT_PARALLEL_SEQUENCER* pParallelSeq = new BT_PARALLEL_SEQUENCER("MainParallelSequence", pBT, 50);
 
         //--------------------------------------------------------------Global--------------------------------------------------------------//
         //For all Units:
+        
+        BT_DECO_REPEATER* pAttackForeverRepeater = new BT_DECO_REPEATER("RepeatForeverAttack", pParallelSeq, 0, true, false, true);
+        BT_SELECTOR* pAttackSelector = new BT_SELECTOR("AttackSequencer", pAttackForeverRepeater, 3);
+
+        //Search & Eliminate
+        //UNIT_ACTION_SEARCHSIDES* pSearchAndEliminate = new UNIT_ACTION_SEARCHSIDES("RetributiveAttack", pAttackSelector);
+
         //Retributive Attack
-        BT_DECO_REPEATER* pRetributionForeverRepeater = new BT_DECO_REPEATER("RepeatForeverRetribute", pParallelSeq, 0, true, false, true);
-        GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pRetributionForeverRepeater);
-
-            BT_PARALLEL_SELECTOR* pRetributiveAttackAndWait = new BT_PARALLEL_SELECTOR("RetributiveAttackAndWait", pIsUnderAttack, 2); //FIXME
-
-            BT_ACTION_WAIT* pRetributionWait = new BT_ACTION_WAIT("WaitForResponse", pRetributiveAttackAndWait, 2);
-            UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pRetributiveAttackAndWait);
+        GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK* pIsUnderAttack = new GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK("WeAreUnderAttack", pAttackSelector);
+        UNIT_ACTION_RETRIBUTIVE_ATTACK* pRetribution = new UNIT_ACTION_RETRIBUTIVE_ATTACK("RetributiveAttack", pIsUnderAttack);
 
         //Counter-Attack
-        BT_DECO_REPEATER* pCounterAttackForeverRepeater = new BT_DECO_REPEATER("RepeatForeverCounterAttack", pParallelSeq, 0, true, false, true);
-        UNIT_DECO_CONDITION_GO_COUNTER_ATTACK* pGoCounterAttack = new UNIT_DECO_CONDITION_GO_COUNTER_ATTACK("goCounterAttack", pCounterAttackForeverRepeater);
+        UNIT_DECO_CONDITION_GO_COUNTER_ATTACK* pGoCounterAttack = new UNIT_DECO_CONDITION_GO_COUNTER_ATTACK("goCounterAttack", pAttackSelector);
         UNIT_ACTION_COUNTER_ATTACK* pCounterAttack = new UNIT_ACTION_COUNTER_ATTACK("RetributiveAttack", pGoCounterAttack);
+
 
 
         //-------------------------------------------------------------Building-------------------------------------------------------------//
@@ -252,13 +254,13 @@ StarterBot::StarterBot()
                 SCV_ACTION_BUILD_UNFINISHED_BUILDING* pBuildUnfinishedBuilding = new SCV_ACTION_BUILD_UNFINISHED_BUILDING("BuildUnfinishedBuilding", pBuildUnfinishedBuildingAndWait);
 
             //Build Supply Provider
-            BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, true);
+            BT_DECO_REPEATER* pBuildSupplyProviderForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildSupplyProvider", pParallelSeq, 0, true, false, false);
             BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY* pNotEnoughSupply = new BT_DECO_CONDITION_NOT_ENOUGH_SUPPLY("NotEnoughSupply", pBuildSupplyProviderForeverRepeater);
 
-                BT_SEQUENCER* pBuildSupplyAndWait = new BT_SEQUENCER("BuildSupplyAndWait", pNotEnoughSupply, 2);
+                //BT_SEQUENCER* pBuildSupplyAndWait = new BT_SEQUENCER("BuildSupplyAndWait", pNotEnoughSupply, 2);
 
-                BT_ACTION_WAIT* pSupplyWait = new BT_ACTION_WAIT("WaitForResponse", pBuildSupplyAndWait, 3);
-                SCV_ACTION_BUILD_SUPPLY_PROVIDER* pBuildSupplyProvider = new SCV_ACTION_BUILD_SUPPLY_PROVIDER("BuildSupplyProvider", pBuildSupplyAndWait);
+                //BT_ACTION_WAIT* pSupplyWait = new BT_ACTION_WAIT("WaitForResponse", pBuildSupplyAndWait, 1);
+                SCV_ACTION_BUILD_SUPPLY_PROVIDER* pBuildSupplyProvider = new SCV_ACTION_BUILD_SUPPLY_PROVIDER("BuildSupplyProvider", pNotEnoughSupply);
 
             //Build Barracks
             BT_DECO_REPEATER* pBuildBarracksForeverRepeater = new BT_DECO_REPEATER("RepeatForeverBuildBarracks", pParallelSeq, 0, true, false, true);
@@ -348,7 +350,246 @@ StarterBot::StarterBot()
                 BT_ACTION_WAIT* pCommandCenterWait = new BT_ACTION_WAIT("WaitForResponse", pBuildCommandCenterAndWait, 6);
                 SCV_ACTION_BUILD_COMMANDCENTER* pBuildCommandCenter = new SCV_ACTION_BUILD_COMMANDCENTER("BuildCommandCenter", pBuildCommandCenterAndWait);
            
+            //---------------------------------------------------------------Tech---------------------------------------------------------------//
 
+            BT_DECO_REPEATER* pAcademyResearch = new BT_DECO_REPEATER("RepeatForeverAcademyResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckAcademyResearch = new BT_SELECTOR("CheckAcademyResearch", pAcademyResearch, 5);
+
+            AC_DECO_CONDITION_RESEARCH_STIMPACKTECH* pStimopacktechCanResearch = new AC_DECO_CONDITION_RESEARCH_STIMPACKTECH("StimopacktechCanResearch", pCheckAcademyResearch);
+            AC_ACTION_RESEARCH_STIMPACKTECH* pStimopacktechResearch = new AC_ACTION_RESEARCH_STIMPACKTECH("StimopacktechResearch", pStimopacktechCanResearch);
+
+            AC_DECO_CONDITION_RESEARCH_U238SHELLS* pU238shellsCanResearch = new AC_DECO_CONDITION_RESEARCH_U238SHELLS("U238shellsCanResearch", pCheckAcademyResearch);
+            AC_ACTION_RESEARCH_U238SHELLS* pU238shellsResearch = new AC_ACTION_RESEARCH_U238SHELLS("U238shellsResearch", pU238shellsCanResearch);
+
+            AC_DECO_CONDITION_RESEARCH_RESTORATION* pRestorationCanResearch = new AC_DECO_CONDITION_RESEARCH_RESTORATION("RestorationCanResearch", pCheckAcademyResearch);
+            AC_ACTION_RESEARCH_RESTORATION* pRestorationResearch = new AC_ACTION_RESEARCH_RESTORATION("RestorationResearch", pRestorationCanResearch);
+
+            AC_DECO_CONDITION_RESEARCH_CADUCEUSREACTOR* pCaduceusreactorCanResearch = new AC_DECO_CONDITION_RESEARCH_CADUCEUSREACTOR("CaduceusreactorCanResearch", pCheckAcademyResearch);
+            AC_ACTION_RESEARCH_CADUCEUSREACTOR* pCaduceusreactorResearch = new AC_ACTION_RESEARCH_CADUCEUSREACTOR("CaduceusreactorResearch", pCaduceusreactorCanResearch);
+
+            AC_DECO_CONDITION_RESEARCH_OPTICFLARE* pOpticflareCanResearch = new AC_DECO_CONDITION_RESEARCH_OPTICFLARE("OpticflareCanResearch", pCheckAcademyResearch);
+            AC_ACTION_RESEARCH_OPTICFLARE* pOpticflareResearch = new AC_ACTION_RESEARCH_OPTICFLARE("OpticflareResearch", pOpticflareCanResearch);
+
+            BT_DECO_REPEATER* pArmoryResearch = new BT_DECO_REPEATER("RepeatForeverArmoryResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckArmoryResearch = new BT_SELECTOR("CheckArmoryResearch", pArmoryResearch, 12);
+
+            AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV1* pVehicleweaponslv1CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV1("Vehicleweaponslv1CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV1* pVehicleweaponslv1Research = new AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV1("Vehicleweaponslv1Research", pVehicleweaponslv1CanResearch);
+            AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV2* pVehicleweaponslv2CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV2("Vehicleweaponslv2CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV2* pVehicleweaponslv2Research = new AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV2("Vehicleweaponslv2Research", pVehicleweaponslv2CanResearch);
+            AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV3* pVehicleweaponslv3CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV3("Vehicleweaponslv3CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3* pVehicleweaponslv3Research = new AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3("Vehicleweaponslv3Research", pVehicleweaponslv3CanResearch);
+
+            AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV1* pShipweaponslv1CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV1("Shipweaponslv1CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPWEAPONS_LV1* pShipweaponslv1Research = new AR_ACTION_UPGRADE_SHIPWEAPONS_LV1("Shipweaponslv1Research", pShipweaponslv1CanResearch);
+            AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV2* pShipweaponslv2CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV2("Shipweaponslv2CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPWEAPONS_LV2* pShipweaponslv2Research = new AR_ACTION_UPGRADE_SHIPWEAPONS_LV2("Shipweaponslv2Research", pShipweaponslv2CanResearch);
+            AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV3* pShipweaponslv3CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV3("Shipweaponslv3CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPWEAPONS_LV3* pShipweaponslv3Research = new AR_ACTION_UPGRADE_SHIPWEAPONS_LV3("Shipweaponslv3Research", pShipweaponslv3CanResearch);
+
+            AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV1* pVehiclearmorlv1CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV1("Vehiclearmorlv1CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEARMOR_LV1* pVehiclearmorlv1Research = new AR_ACTION_UPGRADE_VEHICLEARMOR_LV1("Vehiclearmorlv1Research", pVehiclearmorlv1CanResearch);
+            AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV2* pVehiclearmorlv2CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV2("Vehiclearmorlv2CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEARMOR_LV2* pVehiclearmorlv2Research = new AR_ACTION_UPGRADE_VEHICLEARMOR_LV2("Vehiclearmorlv2Research", pVehiclearmorlv2CanResearch);
+            AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV3* pVehiclearmorlv3CanResearch = new AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV3("Vehiclearmorlv3CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_VEHICLEARMOR_LV3* pVehiclearmorlv3Research = new AR_ACTION_UPGRADE_VEHICLEARMOR_LV3("Vehiclearmorlv3Research", pVehiclearmorlv3CanResearch);
+
+            AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV1* pShiparmorlv1CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV1("Shiparmorlv1CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPARMOR_LV1* pShiparmorlv1Research = new AR_ACTION_UPGRADE_SHIPARMOR_LV1("Shiparmorlv1Research", pShiparmorlv1CanResearch);
+            AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV2* pShiparmorlv2CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV2("Shiparmorlv2CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPARMOR_LV2* pShiparmorlv2Research = new AR_ACTION_UPGRADE_SHIPARMOR_LV2("Shiparmorlv2Research", pShiparmorlv2CanResearch);
+            AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV3* pShiparmorlv3CanResearch = new AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV3("Shiparmorlv3CanResearch", pCheckArmoryResearch);
+            AR_ACTION_UPGRADE_SHIPARMOR_LV3* pShiparmorlv3Research = new AR_ACTION_UPGRADE_SHIPARMOR_LV3("Shiparmorlv3Research", pShiparmorlv3CanResearch);
+
+            BT_DECO_REPEATER* pEngineeringbayResearch = new BT_DECO_REPEATER("RepeatForeverEngineeringbayResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckEngineeringbayResearch = new BT_SELECTOR("CheckEngineeringbayResearch", pEngineeringbayResearch, 6);
+
+            EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV1* pInfantryweaponslv1CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV1("Infantryweaponslv1CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV1* pInfantryweaponslv1Research = new EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV1("Infantryweaponslv1Research", pInfantryweaponslv1CanResearch);
+            EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV2* pInfantryweaponslv2CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV2("Infantryweaponslv2CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV2* pInfantryweaponslv2Research = new EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV2("Infantryweaponslv2Research", pInfantryweaponslv2CanResearch);
+            EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV3* pInfantryweaponslv3CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV3("Infantryweaponslv3CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV3* pInfantryweaponslv3Research = new EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV3("Infantryweaponslv3Research", pInfantryweaponslv3CanResearch);
+
+            EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV1* pInfantryarmorlv1CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV1("Infantryarmorlv1CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYARMOR_LV1* pInfantryarmorlv1Research = new EB_ACTION_UPGRADE_INFANTRYARMOR_LV1("Infantryarmorlv1Research", pInfantryarmorlv1CanResearch);
+            EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV2* pInfantryarmorlv2CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV2("Infantryarmorlv2CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYARMOR_LV2* pInfantryarmorlv2Research = new EB_ACTION_UPGRADE_INFANTRYARMOR_LV2("Infantryarmorlv2Research", pInfantryarmorlv2CanResearch);
+            EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV3* pInfantryarmorlv3CanResearch = new EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV3("Infantryarmorlv3CanResearch", pCheckEngineeringbayResearch);
+            EB_ACTION_UPGRADE_INFANTRYARMOR_LV3* pInfantryarmorlv3Research = new EB_ACTION_UPGRADE_INFANTRYARMOR_LV3("Infantryarmorlv3Research", pInfantryarmorlv3CanResearch);
+
+            BT_DECO_REPEATER* pMachineshopResearch = new BT_DECO_REPEATER("RepeatForeverMachineshopResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckMachineshopResearch = new BT_SELECTOR("CheckMachineshopResearch", pMachineshopResearch, 4);
+
+            MS_DECO_CONDITION_RESEARCH_SIEGETECH* pSiegetechCanResearch = new MS_DECO_CONDITION_RESEARCH_SIEGETECH("SiegetechCanResearch", pCheckMachineshopResearch);
+            MS_ACTION_RESEARCH_SIEGETECH* pSiegetechResearch = new MS_ACTION_RESEARCH_SIEGETECH("SiegetechResearch", pSiegetechCanResearch);
+
+            /*
+            MS_DECO_CONDITION_RESEARCH_SPIDERMINE* pSpidermineCanResearch = new MS_DECO_CONDITION_RESEARCH_SPIDERMINE("SpidermineCanResearch", pCheckMachineshopResearch);
+            MS_ACTION_RESEARCH_SPIDERMINE* pSpidermineResearch = new MS_ACTION_RESEARCH_SPIDERMINE("SpidermineResearch", pSpidermineCanResearch);
+            */
+
+            MS_DECO_CONDITION_RESEARCH_CHARONBOOSTERS* pCharonboosterCanResearch = new MS_DECO_CONDITION_RESEARCH_CHARONBOOSTERS("CharonboosterCanResearch", pCheckMachineshopResearch);
+            MS_ACTION_RESEARCH_CHARONBOOSTERS* pCharonboosterResearch = new MS_ACTION_RESEARCH_CHARONBOOSTERS("CharonboosterResearch", pCharonboosterCanResearch);
+
+            MS_DECO_CONDITION_RESEARCH_IONTHRUSTERS* pIonthrustersCanResearch = new MS_DECO_CONDITION_RESEARCH_IONTHRUSTERS("IonthrustersCanResearch", pCheckMachineshopResearch);
+            MS_ACTION_RESEARCH_IONTHRUSTERS* pIonthrustersResearch = new MS_ACTION_RESEARCH_IONTHRUSTERS("IonthrustersResearch", pIonthrustersCanResearch);
+
+            BT_DECO_REPEATER* pSciencefacilityResearch = new BT_DECO_REPEATER("RepeatForeverSciencefacilityResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckSciencefacilityResearch = new BT_SELECTOR("CheckSciencefacilityResearch", pSciencefacilityResearch, 3);
+
+            SF_DECO_CONDITION_RESEARCH_EMPSHOCKWAVE* pEmpshockwaveCanResearch = new SF_DECO_CONDITION_RESEARCH_EMPSHOCKWAVE("EmpshockwaveCanResearch", pCheckSciencefacilityResearch);
+            SF_ACTION_RESEARCH_EMPSHOCKWAVE* pEmpshockwaveResearch = new SF_ACTION_RESEARCH_EMPSHOCKWAVE("EmpshockwaveResearch", pEmpshockwaveCanResearch);
+
+            SF_DECO_CONDITION_RESEARCH_IRRADIATE* pIrradiateCanResearch = new SF_DECO_CONDITION_RESEARCH_IRRADIATE("IrradiateCanResearch", pCheckSciencefacilityResearch);
+            SF_ACTION_RESEARCH_IRRADIATE* pIrradiateResearch = new SF_ACTION_RESEARCH_IRRADIATE("IrradiateResearch", pIrradiateCanResearch);
+
+            SF_DECO_CONDITION_RESEARCH_TITANREACTOR* pTitanreactorCanResearch = new SF_DECO_CONDITION_RESEARCH_TITANREACTOR("TitanreactorCanResearch", pCheckSciencefacilityResearch);
+            SF_ACTION_RESEARCH_TITANREACTOR* pTitanreactorResearch = new SF_ACTION_RESEARCH_TITANREACTOR("TitanreactorResearch", pTitanreactorCanResearch);
+
+            BT_DECO_REPEATER* pCovertopsResearch = new BT_DECO_REPEATER("RepeatForeverCovertopsResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckCovertopsResearch = new BT_SELECTOR("CheckCovertopsResearch", pCovertopsResearch, 4);
+
+            CO_DECO_CONDITION_RESEARCH_LOCKDOWN* pLockdownCanResearch = new CO_DECO_CONDITION_RESEARCH_LOCKDOWN("LockdownCanResearch", pCheckCovertopsResearch);
+            CO_ACTION_RESEARCH_LOCKDOWN* pLockdownResearch = new CO_ACTION_RESEARCH_LOCKDOWN("LockdownResearch", pLockdownCanResearch);
+
+            CO_DECO_CONDITION_RESEARCH_PERSONALCLOAKING* pPersonalcloakingCanResearch = new CO_DECO_CONDITION_RESEARCH_PERSONALCLOAKING("PersonalcloakingCanResearch", pCheckCovertopsResearch);
+            CO_ACTION_RESEARCH_PERSONALCLOAKING* pPersonalcloakingResearch = new CO_ACTION_RESEARCH_PERSONALCLOAKING("PersonalcloakingResearch", pPersonalcloakingCanResearch);
+
+            CO_DECO_CONDITION_RESEARCH_OCULARIMPLANTS* pOcularimplantsCanResearch = new CO_DECO_CONDITION_RESEARCH_OCULARIMPLANTS("OcularimplantsCanResearch", pCheckCovertopsResearch);
+            CO_ACTION_RESEARCH_OCULARIMPLANTS* pOcularimplantsResearch = new CO_ACTION_RESEARCH_OCULARIMPLANTS("OcularimplantsResearch", pOcularimplantsCanResearch);
+
+            CO_DECO_CONDITION_RESEARCH_MOEBIUSREACTOR* pMoebiusreactorCanResearch = new CO_DECO_CONDITION_RESEARCH_MOEBIUSREACTOR("MoebiusreactorCanResearch", pCheckCovertopsResearch);
+            CO_ACTION_RESEARCH_MOEBIUSREACTOR* pMoebiusreactorResearch = new CO_ACTION_RESEARCH_MOEBIUSREACTOR("MoebiusreactorResearch", pMoebiusreactorCanResearch);
+
+            BT_DECO_REPEATER* pPhysicslabResearch = new BT_DECO_REPEATER("RepeatForeverPhysicslabResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckPhysicslabResearch = new BT_SELECTOR("CheckPhysicslabResearch", pPhysicslabResearch, 2);
+
+            PL_DECO_CONDITION_RESEARCH_YAMATOGUN* pYamatogunCanResearch = new PL_DECO_CONDITION_RESEARCH_YAMATOGUN("YamatogunCanResearch", pCheckPhysicslabResearch);
+            PL_ACTION_RESEARCH_YAMATOGUN* pYamatogunResearch = new PL_ACTION_RESEARCH_YAMATOGUN("YamatogunResearch", pYamatogunCanResearch);
+
+            PL_DECO_CONDITION_RESEARCH_COLOSSUSREACTOR* pColossusreactorCanResearch = new PL_DECO_CONDITION_RESEARCH_COLOSSUSREACTOR("ColossusreactorCanResearch", pCheckPhysicslabResearch);
+            PL_ACTION_RESEARCH_COLOSSUSREACTOR* pColossusreactorResearch = new PL_ACTION_RESEARCH_COLOSSUSREACTOR("ColossusreactorResearch", pColossusreactorCanResearch);
+
+            BT_DECO_REPEATER* pControltowerResearch = new BT_DECO_REPEATER("RepeatForeverControltowerResearch", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pCheckControltowerResearch = new BT_SELECTOR("CheckControltowerResearch", pControltowerResearch, 2);
+
+            CT_DECO_CONDITION_RESEARCH_CLOAKINGFIELD* pCloakingfieldCanResearch = new CT_DECO_CONDITION_RESEARCH_CLOAKINGFIELD("CloakingfieldCanResearch", pCheckControltowerResearch);
+            CT_ACTION_RESEARCH_CLOAKINGFIELD* pCloakingfieldResearch = new CT_ACTION_RESEARCH_CLOAKINGFIELD("CloakingfieldResearch", pCloakingfieldCanResearch);
+
+            CT_DECO_CONDITION_RESEARCH_APOLLOREACTOR* pApolloreactorCanResearch = new CT_DECO_CONDITION_RESEARCH_APOLLOREACTOR("ApolloreactorCanResearch", pCheckControltowerResearch);
+            CT_ACTION_RESEARCH_APOLLOREACTOR* pApolloreactorResearch = new CT_ACTION_RESEARCH_APOLLOREACTOR("ApolloreactorResearch", pApolloreactorCanResearch);
+
+            //---------------------------------------------------------------Skill---------------------------------------------------------------//
+            
+            BT_DECO_REPEATER* pBCYamatogunForeverRepeater = new BT_DECO_REPEATER("BCYamatogunForeverRepeater", pParallelSeq, 0, true, false, true);
+
+            BT_SEQUENCER* pBCYamatogunAndWait = new BT_SEQUENCER("BCYamatogunAndWait", pBCYamatogunForeverRepeater, 2);
+            BT_ACTION_WAIT* pBCYamatogunWait = new BT_ACTION_WAIT("WaitForBCYamatogun", pBCYamatogunAndWait, 2);
+            BC_ACTION_USE_ABILITY_YAMATOGUN* pUseBCYamatogun = new BC_ACTION_USE_ABILITY_YAMATOGUN("UseBCYamatogun", pBCYamatogunAndWait);
+            /*
+            BT_DECO_REPEATER* pDropshipForeverRepeater = new BT_DECO_REPEATER("DropshipForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectDropship = new BT_SELECTOR("SelectDropship", pDropshipForeverRepeater, 2);
+
+            BT_SEQUENCER* pDSLoadAndWait = new BT_SEQUENCER("DSLoadAndWait", pSelectDropship, 2);
+            BT_ACTION_WAIT* pDSLoadWait = new BT_ACTION_WAIT("WaitForDSLoad", pDSLoadAndWait, 2);
+            DS_ACTION_USE_ABILITY_LOAD* pUseDSLoad = new DS_ACTION_USE_ABILITY_LOAD("UseDSLoad", pDSLoadAndWait);
+
+            BT_SEQUENCER* pDSUnLoadAndWait = new BT_SEQUENCER("DSUnLoadAndWait", pSelectDropship, 2);
+            BT_ACTION_WAIT* pDSUnLoadWait = new BT_ACTION_WAIT("WaitForDSUnLoad", pDSUnLoadAndWait, 2);
+            DS_ACTION_USE_ABILITY_UNLOAD* pUseDSUnLoad = new DS_ACTION_USE_ABILITY_UNLOAD("UseDSUnLoad", pDSUnLoadAndWait);
+            */
+            BT_DECO_REPEATER* pFBStimpackForeverRepeater = new BT_DECO_REPEATER("FBStimpackForeverRepeater", pParallelSeq, 0, true, false, true);
+
+            BT_SEQUENCER* pFBStimpackAndWait = new BT_SEQUENCER("FBStimpackAndWait", pFBStimpackForeverRepeater, 2);
+            BT_ACTION_WAIT* pFBStimpackWait = new BT_ACTION_WAIT("WaitForFBStimpack", pFBStimpackAndWait, 3);
+            FB_ACTION_USE_ABILITY_STIMPACK* pUseFBStimpack = new FB_ACTION_USE_ABILITY_STIMPACK("UseFBStimpack", pFBStimpackAndWait);
+
+            BT_DECO_REPEATER* pGhostForeverRepeater = new BT_DECO_REPEATER("GhostForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectGhost = new BT_SELECTOR("SelectGhost", pGhostForeverRepeater, 4);
+
+            BT_SEQUENCER* pGHCloakAndWait = new BT_SEQUENCER("GHCloakAndWait", pSelectGhost, 2);
+            BT_ACTION_WAIT* pGHCloakWait = new BT_ACTION_WAIT("WaitForGHCloak", pGHCloakAndWait, 2);
+            GH_ACTION_USE_ABILITY_CLOAK* pUseGHCloak = new GH_ACTION_USE_ABILITY_CLOAK("UseGHCloak", pGHCloakAndWait);
+
+            BT_SEQUENCER* pGHLockdownAndWait = new BT_SEQUENCER("GHLockdownAndWait", pSelectGhost, 2);
+            BT_ACTION_WAIT* pGHLockdownWait = new BT_ACTION_WAIT("WaitForGHLockdown", pGHLockdownAndWait, 2);
+            GH_ACTION_USE_ABILITY_LOCKDOWN* pUseGHLockdown = new GH_ACTION_USE_ABILITY_LOCKDOWN("UseGHLockdown", pGHLockdownAndWait);
+
+            BT_SEQUENCER* pGHNukeAndWait = new BT_SEQUENCER("GHNukeAndWait", pSelectGhost, 2);
+            BT_ACTION_WAIT* pGHNukeWait = new BT_ACTION_WAIT("WaitForGHNuke", pGHNukeAndWait, 1);
+            GH_ACTION_USE_ABILITY_NUKE* pUseGHNuke = new GH_ACTION_USE_ABILITY_NUKE("UseGHNuke", pGHNukeAndWait);
+
+            BT_SEQUENCER* pGHUncloakAndWait = new BT_SEQUENCER("GHUncloakAndWait", pSelectGhost, 2);
+            BT_ACTION_WAIT* pGHUncloakWait = new BT_ACTION_WAIT("WaitForGHUncloak", pGHUncloakAndWait, 2);
+            GH_ACTION_USE_ABILITY_UNCLOAK* pUseGHUncloak = new GH_ACTION_USE_ABILITY_UNCLOAK("UseGHUncloak", pGHUncloakAndWait);
+            
+            BT_DECO_REPEATER* pMRStimpackForeverRepeater = new BT_DECO_REPEATER("MRStimpackForeverRepeater", pParallelSeq, 0, true, false, true);
+
+            BT_SEQUENCER* pMRStimpackAndWait = new BT_SEQUENCER("MRStimpackAndWait", pMRStimpackForeverRepeater, 2);
+            BT_ACTION_WAIT* pMRStimpackWait = new BT_ACTION_WAIT("WaitForMRStimpack", pMRStimpackAndWait, 3);
+            MR_ACTION_USE_ABILITY_STIMPACK* pUseMRStimpack = new MR_ACTION_USE_ABILITY_STIMPACK("UseMRStimpack", pMRStimpackAndWait);
+
+            BT_DECO_REPEATER* pMedicForeverRepeater = new BT_DECO_REPEATER("MedicForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectMedic = new BT_SELECTOR("SelectMedic", pMedicForeverRepeater, 2);
+
+            BT_SEQUENCER* pMDOpticflareAndWait = new BT_SEQUENCER("MDOpticflareAndWait", pSelectMedic, 2);
+            BT_ACTION_WAIT* pMDOpticflareWait = new BT_ACTION_WAIT("WaitForMDOpticflare", pMDOpticflareAndWait, 2);
+            MD_ACTION_USE_ABILITY_OPTICFLARE* pUseMDOpticflare = new MD_ACTION_USE_ABILITY_OPTICFLARE("UseMDOpticflare", pMDOpticflareAndWait);
+
+            BT_SEQUENCER* pMDRestorationAndWait = new BT_SEQUENCER("MDRestorationAndWait", pSelectMedic, 2);
+            BT_ACTION_WAIT* pMDRestorationWait = new BT_ACTION_WAIT("WaitForMDRestoration", pMDRestorationAndWait, 2);
+            MD_ACTION_USE_ABILITY_RESTORATION* pUseMDRestoration = new MD_ACTION_USE_ABILITY_RESTORATION("UseMDRestoration", pMDRestorationAndWait);
+            
+            BT_DECO_REPEATER* pScienceVesselForeverRepeater = new BT_DECO_REPEATER("ScienceVesselForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectScienceVessel = new BT_SELECTOR("SelectScienceVessel", pScienceVesselForeverRepeater, 3);
+
+            BT_SEQUENCER* pSVDefensivematrixAndWait = new BT_SEQUENCER("SVDefensivematrixAndWait", pSelectScienceVessel, 2);
+            BT_ACTION_WAIT* pSVDefensivematrixWait = new BT_ACTION_WAIT("WaitForSVDefensivematrix", pSVDefensivematrixAndWait, 2);
+            SV_ACTION_USE_ABILITY_DEFENSIVEMATRIX* pUseSVDefensivematrix = new SV_ACTION_USE_ABILITY_DEFENSIVEMATRIX("UseSVDefensivematrix", pSVDefensivematrixAndWait);
+
+            BT_SEQUENCER* pSVEmpshockwaveAndWait = new BT_SEQUENCER("SVEmpshockwaveAndWait", pSelectScienceVessel, 2);
+            BT_ACTION_WAIT* pSVEmpshockwaveWait = new BT_ACTION_WAIT("WaitForSVEmpshockwave", pSVEmpshockwaveAndWait, 2);
+            SV_ACTION_USE_ABILITY_EMPSHOCKWAVE* pUseSVEmpshockwave = new SV_ACTION_USE_ABILITY_EMPSHOCKWAVE("UseSVEmpshockwave", pSVEmpshockwaveAndWait);
+
+            BT_SEQUENCER* pSVIrradiateAndWait = new BT_SEQUENCER("SVIrradiateAndWait", pSelectScienceVessel, 2);
+            BT_ACTION_WAIT* pSVIrradiateWait = new BT_ACTION_WAIT("WaitForSVIrradiate", pSVIrradiateAndWait, 2);
+            SV_ACTION_USE_ABILITY_IRRADIATE* pUseSVIrradiate = new SV_ACTION_USE_ABILITY_IRRADIATE("UseSVIrradiate", pSVIrradiateAndWait);
+            /*
+            BT_DECO_REPEATER* pSCVRepairForeverRepeater = new BT_DECO_REPEATER("SCVRepairForeverRepeater", pParallelSeq, 0, true, false, true);
+            
+            BT_SEQUENCER* pSCVRepairAndWait = new BT_SEQUENCER("SCVRepairAndWait", pSCVRepairForeverRepeater, 2);
+            BT_ACTION_WAIT* pSCVRepairWait = new BT_ACTION_WAIT("WaitForSCVRepair", pSCVRepairAndWait, 2);
+            SCV_ACTION_REPAIR* pUseSCVRepair = new SCV_ACTION_REPAIR("UseSCVRepair", pSCVRepairAndWait);
+            */
+            BT_DECO_REPEATER* pSiegeTankForeverRepeater = new BT_DECO_REPEATER("SiegeTankForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectSiegeTank = new BT_SELECTOR("SelectSiegeTank", pSiegeTankForeverRepeater, 2);
+            
+            BT_SEQUENCER* pSTSiegemodeAndWait = new BT_SEQUENCER("STSiegemodeAndWait", pSelectSiegeTank, 2);
+            BT_ACTION_WAIT* pSTSiegemodeWait = new BT_ACTION_WAIT("WaitForSTSiegemode", pSTSiegemodeAndWait, 2);
+            ST_ACTION_USE_ABILITY_SIEGEMODE* pUseSTSiegemode = new ST_ACTION_USE_ABILITY_SIEGEMODE("UseSTSiegemode", pSTSiegemodeAndWait);
+
+            BT_SEQUENCER* pSTTankmodeAndWait = new BT_SEQUENCER("STTankmodeAndWait", pSelectSiegeTank, 2);
+            BT_ACTION_WAIT* pSTTankmodeWait = new BT_ACTION_WAIT("WaitForSTTankmode", pSTTankmodeAndWait, 2);
+            ST_ACTION_USE_ABILITY_TANKMODE* pUseSTTankmode = new ST_ACTION_USE_ABILITY_TANKMODE("UseSTTankmode", pSTTankmodeAndWait);
+            
+            BT_DECO_REPEATER* pVTSpidermineForeverRepeater = new BT_DECO_REPEATER("VTSpidermineForeverRepeater", pParallelSeq, 0, true, false, true);
+
+            BT_SEQUENCER* pVTSpidermineAndWait = new BT_SEQUENCER("VTSpidermineAndWait", pVTSpidermineForeverRepeater, 2);
+            BT_ACTION_WAIT* pVTSpidermineWait = new BT_ACTION_WAIT("WaitForVTSpidermine", pVTSpidermineAndWait, 2);
+            VT_ACTION_USE_ABILITY_SPIDERMINE* pUseVTSpidermine = new VT_ACTION_USE_ABILITY_SPIDERMINE("UseVTSpidermine", pVTSpidermineAndWait);
+
+            BT_DECO_REPEATER* pWraithForeverRepeater = new BT_DECO_REPEATER("WraithForeverRepeater", pParallelSeq, 0, true, false, true);
+            BT_SELECTOR* pSelectWraith = new BT_SELECTOR("SelectWraith", pWraithForeverRepeater, 2);
+
+            BT_SEQUENCER* pWRCloakAndWait = new BT_SEQUENCER("WRCloakAndWait", pSelectWraith, 2);
+            BT_ACTION_WAIT* pWRCloakWait = new BT_ACTION_WAIT("WaitForWRCloak", pWRCloakAndWait, 2);
+            WR_ACTION_USE_ABILITY_CLOAK* pUseWRCloak = new WR_ACTION_USE_ABILITY_CLOAK("UseWRCloak", pWRCloakAndWait);
+
+            BT_SEQUENCER* pWRUncloakAndWait = new BT_SEQUENCER("WRUncloakAndWait", pSelectWraith, 2);
+            BT_ACTION_WAIT* pWRUncloakWait = new BT_ACTION_WAIT("WaitForWRUncloak", pWRUncloakAndWait, 2);
+            WR_ACTION_USE_ABILITY_UNCLOAK* pUseWRUncloak = new WR_ACTION_USE_ABILITY_UNCLOAK("UseWRUncloak", pWRUncloakAndWait);
+            
 }
 
 // Called when the bot starts!
@@ -448,10 +689,21 @@ void StarterBot::onFrame()
             pData->enemyRace = BWAPI::Broodwar->enemy()->getRace();
         }
 
+        //Enemy main base
+        if ((pData->enemyMainDestroyed == false) && (BWAPI::Broodwar->isVisible(BWAPI::TilePosition(pData->enemySpawnLocation))))
+        {
+            auto enemyHome = BWAPI::Broodwar->getUnitsOnTile(BWAPI::TilePosition(pData->enemySpawnLocation), BWAPI::Filter::IsEnemy);
+            if (enemyHome.empty())
+            {
+                BWAPI::Broodwar->sendText("GG WP");
+                pData->enemyMainDestroyed = true;
+            }
+        }
+
         //Game phase
         if (BWAPI::Broodwar->elapsedTime() <= EARLY_GAME)
         {
-            pData->nWantedBarracksTotal = 2;
+            pData->nWantedBarracksTotal = 1;
             pData->nWantedFactoryTotal = 1;
             pData->nWantedStarportTotal = 0;
 
@@ -459,7 +711,7 @@ void StarterBot::onFrame()
             pData->nWantedEngineeringBayTotal = 0;
             pData->nWantedArmoryTotal = 0;
 
-            pData->nWantedCommandCenterForTheMoment = 2;
+            pData->nWantedCommandCenterForTheMoment = 3;
 
             pData->thresholdSupply = 10;
         }
@@ -473,23 +725,29 @@ void StarterBot::onFrame()
             pData->nWantedEngineeringBayTotal = 1;
             pData->nWantedArmoryTotal = 0;
 
-            pData->nWantedCommandCenterForTheMoment = 3;
+            pData->nWantedCommandCenterForTheMoment = 4;
 
-            pData->thresholdSupply = 16;
+            pData->thresholdSupply = 20;
         }
         else
         {
-            pData->nWantedBarracksTotal = 5;
-            pData->nWantedFactoryTotal = 4;
-            pData->nWantedStarportTotal = 3;
+            pData->nWantedBarracksTotal = 4;
+            pData->nWantedFactoryTotal = 3;
+            pData->nWantedStarportTotal = 2;
 
             pData->nWantedScienceFacilityTotal = 2;
             pData->nWantedEngineeringBayTotal = 2;
             pData->nWantedArmoryTotal = 2;
 
-            pData->thresholdSupply = 24;
+            pData->thresholdSupply = 36;
 
             pData->nWantedCommandCenterForTheMoment = 6;
+        }
+
+        if (pData->enemyMainDestroyed)
+        {
+            pData->nWantedCommandCenterForTheMoment = pData->tilesOfExpansions.size();
+            pData->maxAggroDistance = 65536;
         }
 
         //Infrastructures count
@@ -624,7 +882,7 @@ void StarterBot::onUnitDestroy(BWAPI::Unit unit)
     }
 
     //if the unit is a scout
-    if (pData->scoutUnits.contains(unit))
+    if (pData->scoutUnits.size() && pData->scoutUnits.contains(unit))
     {
         pData->scoutUnits.erase(unit);
     }

@@ -1,36 +1,44 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "MS_ACTION_RESEARCH_CHARONBOOSTERS.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+MS_ACTION_RESEARCH_CHARONBOOSTERS::MS_ACTION_RESEARCH_CHARONBOOSTERS(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State MS_ACTION_RESEARCH_CHARONBOOSTERS::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(actionResearchCharonboosters(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string MS_ACTION_RESEARCH_CHARONBOOSTERS::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "ACTION RESEARCH CHARONBOOSTERS";
 }
 
-
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State MS_ACTION_RESEARCH_CHARONBOOSTERS::actionResearchCharonboosters(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    BWAPI::Unit machineshop;
+    bool found = false;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Machine_Shop && unit->isCompleted())
+        {
+            machineshop = unit;
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        if (machineshop->canUpgrade(BWAPI::UpgradeTypes::Charon_Boosters))
+        {
+            machineshop->upgrade(BWAPI::UpgradeTypes::Charon_Boosters);
+            return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

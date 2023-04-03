@@ -30,6 +30,11 @@ bool UNIT_DECO_CONDITION_GO_COUNTER_ATTACK::goCounterAttack(void *data)
         
         return true;
     }
+
+    if (BWAPI::Broodwar->self()->supplyUsed() >= 240)
+    {
+        return true;
+    }
     
     return false;
 }

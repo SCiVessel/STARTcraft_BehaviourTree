@@ -32,7 +32,7 @@ BT_NODE::State SCV_ACTION_BUILD_COMMANDCENTER::BuildCommandCenter(void* data)
     for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
     {
         auto it = pData->unitsFarmingMinerals[i].begin();
-        if ((it != pData->unitsFarmingMinerals[i].end()) && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
+        if ((it != pData->unitsFarmingMinerals[i].end()) && (pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
         {
             builder = *it;
             index = i;
@@ -91,8 +91,13 @@ BT_NODE::State SCV_ACTION_BUILD_COMMANDCENTER::BuildCommandCenter(void* data)
         {
             if (choke->BlockingNeutral()->IsMineral())
             {
-                Tools::SmartRightClick(builder, choke->BlockingNeutral()->Unit());
-                return BT_NODE::FAILURE;
+                if (choke->BlockingNeutral()->Unit()->exists())
+                {
+                    Tools::SmartRightClick(builder, choke->BlockingNeutral()->Unit());
+
+                    pData->unitsFarmingMinerals[index].erase(builder);
+                    return BT_NODE::FAILURE;
+                }
             }
         }
     }
@@ -102,6 +107,8 @@ BT_NODE::State SCV_ACTION_BUILD_COMMANDCENTER::BuildCommandCenter(void* data)
     {
         
         builder->move(BWAPI::Position(buildPos));
+        pData->unitsFarmingMinerals[index].erase(builder);
+
         return BT_NODE::FAILURE;
     }
 

@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class CC_ACTION_TRAIN_WORKER: public BT_ACTION {
+class AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV1 : public BT_ACTION {
 public:
-    CC_ACTION_TRAIN_WORKER(std::string name, BT_NODE* parent);
+    AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV1(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State TrainWorker(void* data);
+    static BT_NODE::State actionResearchVehicleweaponslv1(void* data);
 };
 //----------

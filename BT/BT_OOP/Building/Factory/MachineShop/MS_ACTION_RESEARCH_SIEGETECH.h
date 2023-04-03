@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class CC_ACTION_TRAIN_WORKER: public BT_ACTION {
+class MS_ACTION_RESEARCH_SIEGETECH : public BT_ACTION {
 public:
-    CC_ACTION_TRAIN_WORKER(std::string name, BT_NODE* parent);
+    MS_ACTION_RESEARCH_SIEGETECH(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State TrainWorker(void* data);
+    static BT_NODE::State actionResearchSiegetech(void* data);
 };
 //----------

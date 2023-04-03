@@ -1,32 +1,74 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "SV_ACTION_USE_ABILITY_EMPSHOCKWAVE.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+SV_ACTION_USE_ABILITY_EMPSHOCKWAVE::SV_ACTION_USE_ABILITY_EMPSHOCKWAVE(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State SV_ACTION_USE_ABILITY_EMPSHOCKWAVE::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityEmpshockwave(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string SV_ACTION_USE_ABILITY_EMPSHOCKWAVE::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY EMPSHOCKWAVE";
 }
 
-
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State SV_ACTION_USE_ABILITY_EMPSHOCKWAVE::useAbilityEmpshockwave(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    int energy = 100;
+    bool executed = false;
+    for (auto unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Science_Vessel && unit->isCompleted())
+        {
+            auto enemies = BWAPI::Broodwar->getUnitsInRadius(unit->getPosition(), 256, BWAPI::Filter::IsEnemy && BWAPI::Filter::MaxEnergy);
+            if (unit->getEnergy() >= energy && enemies.size())
+            {
+                BWAPI::Unit target;
+                float value = -1.0f;
+                for (auto e : enemies)
+                {
+                    float valueE = e->getType().mineralPrice() + e->getType().gasPrice() * 1.2f;
+                    if (valueE > value)
+                    {
+                        value = valueE;
+                    }
+                }
+                if (value > 0)
+                {
+                    for (auto e : enemies)
+                    {
+                        if (e->getType().supplyRequired() == value)
+                        {
+                            target = e;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    return BT_NODE::FAILURE;
+                }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+                if (unit->canUseTech(BWAPI::TechTypes::EMP_Shockwave, target))
+                {
+                    unit->useTech(BWAPI::TechTypes::EMP_Shockwave, target);
+                    executed = true;
+                }
+            }
+        }
+    }
 
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    if (executed)
+    {
+        return BT_NODE::SUCCESS;
+    }
+    else
+    {
+        return BT_NODE::FAILURE;
+    }
 }

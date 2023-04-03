@@ -1,32 +1,84 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "MD_ACTION_USE_ABILITY_RESTORATION.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+MD_ACTION_USE_ABILITY_RESTORATION::MD_ACTION_USE_ABILITY_RESTORATION(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State MD_ACTION_USE_ABILITY_RESTORATION::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityRestoration(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string MD_ACTION_USE_ABILITY_RESTORATION::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY RESTORATION";
 }
 
-
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State MD_ACTION_USE_ABILITY_RESTORATION::useAbilityRestoration(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    int energy = 50;
+    bool executed = false;
+    for (auto unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Medic && unit->isCompleted())
+        {
+            auto allies = BWAPI::Broodwar->getUnitsInRadius(unit->getPosition(), 192, BWAPI::Filter::IsAlly);
+            if (unit->getEnergy() >= energy && allies.size())
+            {
+                BWAPI::Unitset controlledAllies;
+                for (auto a : allies)
+                {
+                    if (!a->getType().isBuilding())
+                    {
+                        if (a->isLockedDown() || a->isBlind() || a->isIrradiated() || a->isPlagued() || a->isEnsnared() || a->isParasited() || a->isMaelstrommed())
+                        {
+                            controlledAllies.insert(a);
+                        }
+                    }
+                }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+                if (!controlledAllies.size())
+                {
+                    return BT_NODE::FAILURE;
+                }
 
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
+                BWAPI::Unit target;
+                int supply = -1;
+                for (auto a : controlledAllies)
+                {
+                    int supplyA = a->getType().supplyRequired();
+                    if (supplyA > supply)
+                    {
+                        supply = supplyA;
+                    }
+                }
+                for (auto a : controlledAllies)
+                {
+                    if (a->getType().supplyRequired() == supply)
+                    {
+                        target = a;
+                        break;
+                    }
+                }
 
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+                if (unit->canUseTech(BWAPI::TechTypes::Restoration, target))
+                {
+                    unit->useTech(BWAPI::TechTypes::Restoration, target);
+                    executed = true;
+                }
+            }
+        }
+    }
+
+    if (executed)
+    {
+        return BT_NODE::SUCCESS;
+    }
+    else
+    {
+        return BT_NODE::FAILURE;
+    }
 }

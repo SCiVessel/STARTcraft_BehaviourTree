@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class SCV_ACTION_BUILD_SUPPLY_PROVIDER: public BT_ACTION {
+class SV_ACTION_USE_ABILITY_DEFENSIVEMATRIX : public BT_ACTION {
 public:
-    SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name, BT_NODE* parent);
+    SV_ACTION_USE_ABILITY_DEFENSIVEMATRIX(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State BuildSupplyProvider(void* data);
+    static BT_NODE::State useAbilityDefensiveMatrix(void* data);
 };
 //----------

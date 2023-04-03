@@ -1,36 +1,48 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "EB_ACTION_UPGRADE_INFANTRYARMOR_LV1.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+EB_ACTION_UPGRADE_INFANTRYARMOR_LV1::EB_ACTION_UPGRADE_INFANTRYARMOR_LV1(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State EB_ACTION_UPGRADE_INFANTRYARMOR_LV1::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(actionResearchInfantryarmorlv1(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string EB_ACTION_UPGRADE_INFANTRYARMOR_LV1::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "ACTION RESEARCH INFANTRYARMOR LV1";
 }
 
-
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State EB_ACTION_UPGRADE_INFANTRYARMOR_LV1::actionResearchInfantryarmorlv1(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    BWAPI::Unit engineeringBay;
+    bool found = false;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Engineering_Bay && unit->isCompleted())
+        {
+            if (unit->isResearching())
+            {
+                continue;
+            }
+            engineeringBay = unit;
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        if (engineeringBay->canUpgrade(BWAPI::UpgradeTypes::Terran_Infantry_Armor))
+        {
+            engineeringBay->upgrade(BWAPI::UpgradeTypes::Terran_Infantry_Armor);
+            return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

@@ -5,13 +5,13 @@
 #include <BWAPI.h>
 
 //--------------------
-class SCV_ACTION_BUILD_SUPPLY_PROVIDER: public BT_ACTION {
+class GH_ACTION_USE_ABILITY_NUKE : public BT_ACTION {
 public:
-    SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name, BT_NODE* parent);
+    GH_ACTION_USE_ABILITY_NUKE(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State BuildSupplyProvider(void* data);
+    static BT_NODE::State useAbilityNuke(void* data);
 };
 //----------

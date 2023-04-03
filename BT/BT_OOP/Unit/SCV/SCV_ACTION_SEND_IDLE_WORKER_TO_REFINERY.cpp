@@ -82,7 +82,7 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_REFINERY::SendIdleWorkerToRefinery
                         check.erase(unit);
                     }
                 }
-                unit->rightClick(closestRefinery);
+                Tools::SmartRightClick(unit, closestRefinery);
                 // Insert the worker to the list of the designated base
                 pData->unitsFarmingGeysers[indexCommandCenter].insert(unit);
                 return BT_NODE::SUCCESS;

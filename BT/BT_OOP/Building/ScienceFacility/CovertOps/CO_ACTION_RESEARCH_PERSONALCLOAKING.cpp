@@ -1,36 +1,44 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "CO_ACTION_RESEARCH_PERSONALCLOAKING.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+CO_ACTION_RESEARCH_PERSONALCLOAKING::CO_ACTION_RESEARCH_PERSONALCLOAKING(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State CO_ACTION_RESEARCH_PERSONALCLOAKING::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(actionResearchPersonalcloaking(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string CO_ACTION_RESEARCH_PERSONALCLOAKING::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "ACTION RESEARCH PERSONALCLOAKING";
 }
 
-
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State CO_ACTION_RESEARCH_PERSONALCLOAKING::actionResearchPersonalcloaking(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    BWAPI::Unit covertops;
+    bool found = false;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Covert_Ops && unit->isCompleted())
+        {
+            covertops = unit;
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        if (covertops->canResearch(BWAPI::TechTypes::Personnel_Cloaking))
+        {
+            covertops->research(BWAPI::TechTypes::Personnel_Cloaking);
+            return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

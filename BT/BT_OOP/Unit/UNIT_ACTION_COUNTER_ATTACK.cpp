@@ -24,6 +24,7 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
 
     // F2
     BWAPI::Unitset F2;
+    BWAPI::Unitset woundedF2;
     BWAPI::Unitset Casters;
 
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
@@ -31,7 +32,7 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
         // if the unit can be selected with F2
         if ((unit->getType() == BWAPI::UnitTypes::Terran_Science_Vessel) || (unit->getType() == BWAPI::UnitTypes::Terran_Medic))
         {
-            F2.insert(unit);
+            Casters.insert(unit);
         }
         else if (unit->canAttack() && (unit->getType() != BWAPI::UnitTypes::Terran_SCV))
         {
@@ -39,7 +40,7 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
         }
     }
 
-    bool isCounterAttack = BWAPI::Broodwar->self()->supplyUsed() >= COUNTER_ATTACK_SUPPLY ? true : false;
+    bool isCounterAttack = (BWAPI::Broodwar->self()->supplyUsed() >= COUNTER_ATTACK_SUPPLY || pData->enemyMainDestroyed == true) ? true : false;
 
     // F2 & ATTACK
     for (auto& unit : F2)
@@ -50,10 +51,44 @@ BT_NODE::State UNIT_ACTION_COUNTER_ATTACK::CounterAttack(void* data)
             {
                 unit->attack(pData->enemySpawnLocation);
             }
-            else
+            else if (pData->at_war == false)
             {
-                unit->attack(BWAPI::Position(pData->rallyPoint));
+                unit->move(BWAPI::Position(pData->rallyPoint));
             }   
+        }
+
+        if (unit->getInitialHitPoints() > unit->getHitPoints())
+        {
+            if (unit->getType().isOrganic())
+            {
+                woundedF2.insert(unit);
+            }
+        }
+    }
+
+    for (auto& unit : Casters)
+    {
+        if ((unit->getTarget() == nullptr) || (unit->isIdle()))
+        {
+            if (isCounterAttack)
+            {
+                if (!woundedF2.empty())
+                {
+                    Tools::SmartRightClick(unit, (Tools::GetClosestUnitTo(unit, woundedF2)));
+                }
+                else
+                {
+                    Tools::SmartRightClick(unit, (Tools::GetClosestUnitTo(unit, F2)));
+                }
+
+            }
+            else if (pData->at_war == false)
+            {
+                if (unit->getClosestUnit(BWAPI::Filter::IsOwned && BWAPI::Filter::IsBuilding) == nullptr)
+                {
+                    unit->move(BWAPI::Position(pData->rallyPoint));
+                }
+            }
         }
     }
 

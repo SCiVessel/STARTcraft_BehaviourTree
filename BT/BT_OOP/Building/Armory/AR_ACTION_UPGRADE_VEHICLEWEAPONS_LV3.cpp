@@ -1,36 +1,48 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3::AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(actionResearchVehicleweaponslv3(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "ACTION RESEARCH VEHICLEWEAPONS LV3";
 }
 
-
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3::actionResearchVehicleweaponslv3(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    BWAPI::Unit armory;
+    bool found = false;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Armory && unit->isCompleted())
+        {
+            if (unit->isResearching())
+            {
+                continue;
+            }
+            armory = unit;
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        if (armory->canUpgrade(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons))
+        {
+            armory->upgrade(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons);
+            return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

@@ -1,32 +1,74 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "SV_ACTION_USE_ABILITY_IRRADIATE.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+SV_ACTION_USE_ABILITY_IRRADIATE::SV_ACTION_USE_ABILITY_IRRADIATE(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State SV_ACTION_USE_ABILITY_IRRADIATE::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityIrradiate(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string SV_ACTION_USE_ABILITY_IRRADIATE::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY IRRADIATE";
 }
 
-
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State SV_ACTION_USE_ABILITY_IRRADIATE::useAbilityIrradiate(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    int energy = 75;
+    bool executed = false;
+    for (auto unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Science_Vessel && unit->isCompleted())
+        {
+            auto enemies = BWAPI::Broodwar->getUnitsInRadius(unit->getPosition(), 288, BWAPI::Filter::IsEnemy && BWAPI::Filter::IsFlyer);
+            if (unit->getEnergy() >= energy && enemies.size())
+            {
+                BWAPI::Unit target;
+                int supply = -1;
+                for (auto e : enemies)
+                {
+                    int supplyE = e->getType().supplyRequired();
+                    if (supplyE > supply)
+                    {
+                        supply = supplyE;
+                    }
+                }
+                if (supply > 0)
+                {
+                    for (auto e : enemies)
+                    {
+                        if (e->getType().supplyRequired() == supply)
+                        {
+                            target = e;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    return BT_NODE::FAILURE;
+                }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+                if (unit->canUseTech(BWAPI::TechTypes::Irradiate, target))
+                {
+                    unit->useTech(BWAPI::TechTypes::Irradiate, target);
+                    executed = true;
+                }
+            }
+        }
+    }
 
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    if (executed)
+    {
+        return BT_NODE::SUCCESS;
+    }
+    else
+    {
+        return BT_NODE::FAILURE;
+    }
 }

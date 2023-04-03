@@ -5,13 +5,16 @@
 #include <BWAPI.h>
 
 //--------------------
-class SCV_ACTION_BUILD_SUPPLY_PROVIDER: public BT_ACTION {
+class WR_ACTION_USE_ABILITY_UNCLOAK : public BT_ACTION {
 public:
-    SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name, BT_NODE* parent);
+    WR_ACTION_USE_ABILITY_UNCLOAK(std::string name, BT_NODE* parent);
 
 private:
     State Evaluate(void* data) override;
     std::string GetDescription() override;
-    static BT_NODE::State BuildSupplyProvider(void* data);
+    static BT_NODE::State useAbilityUncloak(void* data);
+
+    static int startWarTime;
+    static int outOfWarTime;
 };
 //----------

@@ -9,7 +9,7 @@ SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER::SCV_DECO_CONDITION_NOT_ENOUGH_COMMA
 
 std::string SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER::GetDescription()
 {
-    return "DECO_CONDITION_NOT_ENOUGH_ACADEMY";
+    return "SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER";
 }
 
 bool SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER::IsThereNotEnoughCommandCenter(void *data)
@@ -40,13 +40,13 @@ bool SCV_DECO_CONDITION_NOT_ENOUGH_COMMANDCENTER::IsThereNotEnoughCommandCenter(
         {
             existingCommandCenter += 1;
             
-            if (existingCommandCenter >= 1)
+            if (existingCommandCenter >= pData->nWantedCommandCenterForTheMoment)
             {
                 break;
             }
         }
     }
- 
+
     // Return true if we need to build more Command Center
     return existingCommandCenter < pData->nWantedCommandCenterForTheMoment;
 }

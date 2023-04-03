@@ -62,6 +62,11 @@ public:
 
 	bool counterAttackFlag = false;
 
+	bool enemyMainDestroyed = false;
+	unsigned int sweepBaseLocation = 0;
+	unsigned int attackBaseLocation = 0;
+
+
 	BWAPI::Unitset scoutUnits;
 
 	BWAPI::Race enemyRace;

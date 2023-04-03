@@ -1,36 +1,44 @@
-#include "CC_ACTION_TRAIN_WORKER.h"
+#include "CT_ACTION_RESEARCH_APOLLOREACTOR.h"
 #include "Tools.h"
 #include "Data.h"
 
-CC_ACTION_TRAIN_WORKER::CC_ACTION_TRAIN_WORKER(std::string name,BT_NODE* parent)
-    :  BT_ACTION(name,parent) {}
+CT_ACTION_RESEARCH_APOLLOREACTOR::CT_ACTION_RESEARCH_APOLLOREACTOR(std::string name, BT_NODE* parent)
+    : BT_ACTION(name, parent) {}
 
-BT_NODE::State CC_ACTION_TRAIN_WORKER::Evaluate(void* data)
+BT_NODE::State CT_ACTION_RESEARCH_APOLLOREACTOR::Evaluate(void* data)
 {
-    return ReturnState(TrainWorker(data));
+    return ReturnState(actionResearchApolloreactor(data));
 }
 
-std::string CC_ACTION_TRAIN_WORKER::GetDescription()
+std::string CT_ACTION_RESEARCH_APOLLOREACTOR::GetDescription()
 {
-    return "TRAIN WORKER";
+    return "ACTION RESEARCH APOLLOREACTOR";
 }
 
-
-BT_NODE::State CC_ACTION_TRAIN_WORKER::TrainWorker(void* data)
+BT_NODE::State CT_ACTION_RESEARCH_APOLLOREACTOR::actionResearchApolloreactor(void* data)
 {
     Data* pData = (Data*)data;
 
-    const BWAPI::UnitType workerType = BWAPI::Broodwar->self()->getRace().getWorker();
-    const BWAPI::Unit myDepot = Tools::GetDepot();
+    BWAPI::Unit controltower;
+    bool found = false;
 
-    // if we have a valid depot unit and it's currently not training something, train a worker
-    // there is no reason for a bot to ever use the unit queueing system, it just wastes resources
-    if (myDepot && !myDepot->isTraining()) { 
-        myDepot->train(workerType); 
-        BWAPI::Error error = BWAPI::Broodwar->getLastError();
-        if(error!=BWAPI::Errors::None)
-            return BT_NODE::FAILURE;
-        else return BT_NODE::SUCCESS;
+    for (auto& unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Control_Tower && unit->isCompleted())
+        {
+            controltower = unit;
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        if (controltower->canUpgrade(BWAPI::UpgradeTypes::Apollo_Reactor))
+        {
+            controltower->upgrade(BWAPI::UpgradeTypes::Apollo_Reactor);
+            return BT_NODE::SUCCESS;
+        }
     }
 
     return BT_NODE::FAILURE;

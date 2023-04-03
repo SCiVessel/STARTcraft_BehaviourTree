@@ -71,7 +71,7 @@ BT_NODE::State SCV_ACTION_SEND_IDLE_WORKER_TO_MINERALS::SendIdleWorkerToMinerals
                         check.erase(unit);
                     }
                 }
-                unit->rightClick(closestMineral);
+                Tools::SmartRightClick(unit, closestMineral);
                 // Insert the worker to the list of the designated base
                 if (!pData->blockingMinerals.empty())
                 {

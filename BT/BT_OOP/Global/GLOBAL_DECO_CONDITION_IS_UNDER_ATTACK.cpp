@@ -16,6 +16,11 @@ bool GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK::IsUnderAttack(void *data)
 {
     Data* pData = (Data*)data;
     
+    if (pData->enemyMainDestroyed)
+    {
+        return true;
+    }
+
     // Check if we are being attacked
     for (auto& unit : BWAPI::Broodwar->self()->getUnits())
     {

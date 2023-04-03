@@ -1,32 +1,46 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "MR_ACTION_USE_ABILITY_STIMPACK.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+MR_ACTION_USE_ABILITY_STIMPACK::MR_ACTION_USE_ABILITY_STIMPACK(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State MR_ACTION_USE_ABILITY_STIMPACK::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityStimpack(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string MR_ACTION_USE_ABILITY_STIMPACK::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY STIMPACK";
 }
 
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State MR_ACTION_USE_ABILITY_STIMPACK::useAbilityStimpack(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    int hp = 10;
+    bool executed = false;
+    for (auto unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Marine && unit->isCompleted())
+        {
+            int hasEnemyInRange = BWAPI::Broodwar->getUnitsInRadius(unit->getPosition(), 192, BWAPI::Filter::IsEnemy).size();
+            if (unit->getHitPoints() >= hp && unit->canUseTech(BWAPI::TechTypes::Stim_Packs) && hasEnemyInRange)
+            {
+                executed = true;
+                unit->useTech(BWAPI::TechTypes::Stim_Packs);
+            }
+        }
+    }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
-
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    if (!executed)
+    {
+        return BT_NODE::FAILURE;
+    }
+    else
+    {
+        return BT_NODE::SUCCESS;
+    }
 }

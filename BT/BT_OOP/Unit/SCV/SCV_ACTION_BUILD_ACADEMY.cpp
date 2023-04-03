@@ -32,7 +32,7 @@ BT_NODE::State SCV_ACTION_BUILD_ACADEMY::BuildAcademy(void* data)
     for (size_t i = 0; i < pData->unitsFarmingMinerals.size(); i++)
     {
         auto it = pData->unitsFarmingMinerals[i].begin();
-        if (it != pData->unitsFarmingMinerals[i].end() && (!pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
+        if (it != pData->unitsFarmingMinerals[i].end() && (pData->stuckUnits.empty() || (!pData->stuckUnits.contains(*it))))
         {
             builder = *it;
             index = i;

@@ -48,6 +48,8 @@
 	#include "BT_OOP/Unit/UNIT_ACTION_COUNTER_ATTACK.h"
 	#include "BT_OOP/Unit/UNIT_DECO_CONDITION_GO_COUNTER_ATTACK.h"
 
+	#include "BT_OOP/Unit/UNIT_ACTION_SEARCHSIDES.h"
+
 
 		//SCV
 		#include "BT_OOP/Unit/SCV/SCV_DECO_CONDITION_EARLY_GAME_SCOUTING.h"
@@ -157,3 +159,120 @@
 	//Global
 		#include "BT_OOP/Global/GLOBAL_DECO_CONDITION_IS_UNDER_ATTACK.h"
 
+	//Tech
+		#include "BT/BT_OOP/Building/Academy/AC_ACTION_RESEARCH_CADUCEUSREACTOR.h"
+		#include "BT/BT_OOP/Building/Academy/AC_ACTION_RESEARCH_OPTICFLARE.h"
+		#include "BT/BT_OOP/Building/Academy/AC_ACTION_RESEARCH_RESTORATION.h"
+		#include "BT/BT_OOP/Building/Academy/AC_ACTION_RESEARCH_STIMPACKTECH.h"
+		#include "BT/BT_OOP/Building/Academy/AC_ACTION_RESEARCH_U238SHELLS.h"
+		#include "BT/BT_OOP/Building/Academy/AC_DECO_CONDITION_RESEARCH_CADUCEUSREACTOR.h"
+		#include "BT/BT_OOP/Building/Academy/AC_DECO_CONDITION_RESEARCH_OPTICFLARE.h"
+		#include "BT/BT_OOP/Building/Academy/AC_DECO_CONDITION_RESEARCH_RESTORATION.h"
+		#include "BT/BT_OOP/Building/Academy/AC_DECO_CONDITION_RESEARCH_STIMPACKTECH.h"
+		#include "BT/BT_OOP/Building/Academy/AC_DECO_CONDITION_RESEARCH_U238SHELLS.h"
+
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_SHIPWEAPONS_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_ACTION_UPGRADE_VEHICLEWEAPONS_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_SHIPWEAPONS_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/Armory/AR_DECO_CONDITION_UPGRADE_VEHICLEWEAPONS_LV3.h"
+
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_ACTION_UPGRADE_INFANTRYWEAPONS_LV3.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV1.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV2.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYARMOR_LV3.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV1.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV2.h"
+		#include "BT/BT_OOP/Building/EngineeringBay/EB_DECO_CONDITION_UPGRADE_INFANTRYWEAPONS_LV3.h"
+
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_ACTION_RESEARCH_CHARONBOOSTERS.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_ACTION_RESEARCH_IONTHRUSTERS.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_ACTION_RESEARCH_SIEGETECH.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_ACTION_RESEARCH_SPIDERMINE.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_DECO_CONDITION_RESEARCH_CHARONBOOSTERS.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_DECO_CONDITION_RESEARCH_IONTHRUSTERS.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_DECO_CONDITION_RESEARCH_SIEGETECH.h"
+		#include "BT/BT_OOP/Building/Factory/MachineShop/MS_DECO_CONDITION_RESEARCH_SPIDERMINE.h"
+
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_ACTION_RESEARCH_EMPSHOCKWAVE.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_ACTION_RESEARCH_IRRADIATE.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_ACTION_RESEARCH_TITANREACTOR.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_DECO_CONDITION_RESEARCH_EMPSHOCKWAVE.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_DECO_CONDITION_RESEARCH_IRRADIATE.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/SF_DECO_CONDITION_RESEARCH_TITANREACTOR.h"
+
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_ACTION_RESEARCH_LOCKDOWN.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_ACTION_RESEARCH_MOEBIUSREACTOR.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_ACTION_RESEARCH_OCULARIMPLANTS.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_ACTION_RESEARCH_PERSONALCLOAKING.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_DECO_CONDITION_RESEARCH_LOCKDOWN.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_DECO_CONDITION_RESEARCH_MOEBIUSREACTOR.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_DECO_CONDITION_RESEARCH_OCULARIMPLANTS.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/CovertOps/CO_DECO_CONDITION_RESEARCH_PERSONALCLOAKING.h"
+
+		#include "BT/BT_OOP/Building/ScienceFacility/PhysicsLab/PL_ACTION_RESEARCH_COLOSSUSREACTOR.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/PhysicsLab/PL_ACTION_RESEARCH_YAMATOGUN.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/PhysicsLab/PL_DECO_CONDITION_RESEARCH_COLOSSUSREACTOR.h"
+		#include "BT/BT_OOP/Building/ScienceFacility/PhysicsLab/PL_DECO_CONDITION_RESEARCH_YAMATOGUN.h"
+
+		#include "BT/BT_OOP/Building/Starport/ControlTower/CT_ACTION_RESEARCH_APOLLOREACTOR.h"
+		#include "BT/BT_OOP/Building/Starport/ControlTower/CT_ACTION_RESEARCH_CLOAKINGFIELD.h"
+		#include "BT/BT_OOP/Building/Starport/ControlTower/CT_DECO_CONDITION_RESEARCH_APOLLOREACTOR.h"
+		#include "BT/BT_OOP/Building/Starport/ControlTower/CT_DECO_CONDITION_RESEARCH_CLOAKINGFIELD.h"
+
+		//Skill
+		#include "BT/BT_OOP/Unit/Battlecruiser/BC_ACTION_USE_ABILITY_YAMATOGUN.h"
+
+		#include "BT/BT_OOP/Unit/Dropship/DS_ACTION_USE_ABILITY_LOAD.h"
+		#include "BT/BT_OOP/Unit/Dropship/DS_ACTION_USE_ABILITY_UNLOAD.h"
+
+		#include "BT/BT_OOP/Unit/Firebat/FB_ACTION_USE_ABILITY_STIMPACK.h"
+
+		#include "BT/BT_OOP/Unit/Ghost/GH_ACTION_USE_ABILITY_CLOAK.h"
+		#include "BT/BT_OOP/Unit/Ghost/GH_ACTION_USE_ABILITY_LOCKDOWN.h"
+		#include "BT/BT_OOP/Unit/Ghost/GH_ACTION_USE_ABILITY_NUKE.h"
+		#include "BT/BT_OOP/Unit/Ghost/GH_ACTION_USE_ABILITY_UNCLOAK.h"
+
+		#include "BT/BT_OOP/Unit/Marine/MR_ACTION_USE_ABILITY_STIMPACK.h"
+
+		#include "BT/BT_OOP/Unit/Medic/MD_ACTION_USE_ABILITY_HEAL.h"
+		#include "BT/BT_OOP/Unit/Medic/MD_ACTION_USE_ABILITY_OPTICFLARE.h"
+		#include "BT/BT_OOP/Unit/Medic/MD_ACTION_USE_ABILITY_RESTORATION.h"
+
+		#include "BT/BT_OOP/Unit/ScienceVessel/SV_ACTION_USE_ABILITY_DEFENSIVEMATRIX.h"
+		#include "BT/BT_OOP/Unit/ScienceVessel/SV_ACTION_USE_ABILITY_EMPSHOCKWAVE.h"
+		#include "BT/BT_OOP/Unit/ScienceVessel/SV_ACTION_USE_ABILITY_IRRADIATE.h"
+
+		#include "BT/BT_OOP/Unit/SCV/SCV_ACTION_REPAIR.h"
+
+		#include "BT/BT_OOP/Unit/SiegeTank/ST_ACTION_USE_ABILITY_SIEGEMODE.h"
+		#include "BT/BT_OOP/Unit/SiegeTank/ST_ACTION_USE_ABILITY_TANKMODE.h"
+
+		#include "BT/BT_OOP/Unit/Vulture/VT_ACTION_USE_ABILITY_SPIDERMINE.h"
+
+		#include "BT/BT_OOP/Unit/Wraith/WR_ACTION_USE_ABILITY_CLOAK.h"
+		#include "BT/BT_OOP/Unit/Wraith/WR_ACTION_USE_ABILITY_UNCLOAK.h"

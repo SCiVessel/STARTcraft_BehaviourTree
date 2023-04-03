@@ -1,32 +1,76 @@
-#include "SCV_ACTION_BUILD_SUPPLY_PROVIDER.h"
+#include "GH_ACTION_USE_ABILITY_LOCKDOWN.h"
 #include "Tools.h"
 #include "Data.h"
 
-SCV_ACTION_BUILD_SUPPLY_PROVIDER::SCV_ACTION_BUILD_SUPPLY_PROVIDER(std::string name,BT_NODE* parent)
+GH_ACTION_USE_ABILITY_LOCKDOWN::GH_ACTION_USE_ABILITY_LOCKDOWN(std::string name,BT_NODE* parent)
     :  BT_ACTION(name,parent) {}
 
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::Evaluate(void* data)
+BT_NODE::State GH_ACTION_USE_ABILITY_LOCKDOWN::Evaluate(void* data)
 {
-    return ReturnState(BuildSupplyProvider(data));
+    return ReturnState(useAbilityLockdown(data));
 }
 
-std::string SCV_ACTION_BUILD_SUPPLY_PROVIDER::GetDescription()
+std::string GH_ACTION_USE_ABILITY_LOCKDOWN::GetDescription()
 {
-    return "BUILD SUPPLY PROVIDER";
+    return "ACTION USE ABILITY LOCKDOWN";
 }
 
-
-BT_NODE::State SCV_ACTION_BUILD_SUPPLY_PROVIDER::BuildSupplyProvider(void* data)
+BT_NODE::State GH_ACTION_USE_ABILITY_LOCKDOWN::useAbilityLockdown(void* data)
 {
     Data* pData = (Data*)data;
 
-    // let's build a supply provider
-    const BWAPI::UnitType supplyProviderType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+    int energy = 100;
+    bool executed = false;
+    for (auto unit : BWAPI::Broodwar->self()->getUnits())
+    {
+        bool hasUnitToExecute = false;
+        if (unit->getType() == BWAPI::UnitTypes::Terran_Ghost && unit->isCompleted())
+        {
+            auto enemies = BWAPI::Broodwar->getUnitsInRadius(unit->getPosition(), 256, BWAPI::Filter::IsEnemy && BWAPI::Filter::IsMechanical);
+            if (unit->getEnergy() >= energy && enemies.size())
+            {
+                BWAPI::Unit target;
+                int supply = -1;
+                for (auto e : enemies)
+                {
+                    int supplyE = e->getType().supplyRequired();
+                    if (supplyE > supply && !e->isLockedDown())
+                    {
+                        supply = supplyE;
+                    }
+                }
+                if (supply > 0)
+                {
+                    for (auto e : enemies)
+                    {
+                        if (e->getType().supplyRequired() == supply && !e->isLockedDown())
+                        {
+                            target = e;
+                            hasUnitToExecute = true;
+                            break;
+                        }
+                    }
+                }
 
-    const bool startedBuilding = Tools::BuildBuilding(supplyProviderType);
+                if (!hasUnitToExecute)
+                {
+                    return BT_NODE::FAILURE;
+                }
+                if (unit->canUseTech(BWAPI::TechTypes::Lockdown, target))
+                {
+                    unit->useTech(BWAPI::TechTypes::Lockdown, target);
+                    executed = true;
+                }
+            }
+        }
+    }
 
-    if (startedBuilding)
-        BWAPI::Broodwar->printf("Started Building %s", supplyProviderType.getName().c_str());
-
-    return startedBuilding ? BT_NODE::SUCCESS:BT_NODE::FAILURE;
+    if (executed)
+    {
+        return BT_NODE::SUCCESS;
+    }
+    else
+    {
+        return BT_NODE::FAILURE;
+    }
 }
